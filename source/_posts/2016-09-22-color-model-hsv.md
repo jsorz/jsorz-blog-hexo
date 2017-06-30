@@ -16,7 +16,7 @@ tags: [util]
 
 物理课上学过光的色散，肯定见过下面这个图。
 
-<img src="/images/captures/20160922_light_dispersion.jpg" style="max-width:400px">
+<img src="/images/captures/20160922_light_dispersion.jpg">
 
 可知白光是各种颜色的光叠加而成的，显然光的三原色是一种“加法”颜色模型。
 
@@ -32,11 +32,11 @@ tags: [util]
 
 即光的三原色，如下图。
 
-<img src="/images/captures/20160922_rgb_colors.jpg" style="max-width:200px">
+<img src="/images/captures/20160922_rgb_colors.jpg">
 
 RGB 颜色模型可以理解为一个立方体的模型，R/G/B 分别代表三维坐标系中的 x/y/z 轴，而原点表示什么颜色都没有(即黑色)
 
-<img src="/images/captures/20160922_rgb_cube.png" style="max-width:300px">
+<img src="/images/captures/20160922_rgb_cube.png">
 
 在计算机多媒体领域中，通常将 R/G/B 三个值标准化到 0~255 的整数区间上，因为这样一个颜色分量共有256个取值，正好可以用一个字节表示。这样 R/G/B 共可组成 `2^24` 种颜色，当然远远超过了人眼能够分辨的颜色数目。
 
@@ -45,7 +45,7 @@ RGB 颜色模型可以理解为一个立方体的模型，R/G/B 分别代表三�
 
 第一节中提到的美术/印刷领域用的三原色，其实就是 CMY 颜色模型。
 
-<img src="/images/captures/20160922_cmy_colors.jpg" style="max-width:200px">
+<img src="/images/captures/20160922_cmy_colors.jpg">
 
 在印刷领域也会用 CMYK 模型，表示青(Cyan)品红(Magenta)黄(Yellow)黑(BlacK)四种颜料，就是在 CMY 的基础上也将黑色作为基础颜色，因为打印时由品红、黄、青合成的黑色不够纯粹。
 
@@ -56,7 +56,7 @@ RGB 颜色模型可以理解为一个立方体的模型，R/G/B 分别代表三�
 
 HSV 使用六角锥体模型来表示 色调（Hue）、饱和度（Saturation）、明度（Value）。
 
-<img src="/images/captures/20160922_hsv_model.jpg" style="max-width:200px">
+<img src="/images/captures/20160922_hsv_model.jpg">
 
 用角度来表示色调`H`，取值范围为0°～360°，从红色开始按逆时针方向计算，红色为0°，绿色为120°，蓝色为240°。它们的补色是：黄色为60°，青色为180°，品红为300°。
 
@@ -66,7 +66,7 @@ HSV 使用六角锥体模型来表示 色调（Hue）、饱和度（Saturation�
 
 > HSV 模型的三维表示从 RGB 立方体演化而来。设想从 RGB 沿立方体对角线的白色顶点向黑色顶点观察，就可以看到立方体的六边形外形。六边形边界表示色彩，水平轴表示纯度，明度沿垂直轴测量。
 
-<img src="/images/captures/20160922_hsv_from_cube.png" style="max-width:400px">
+<img src="/images/captures/20160922_hsv_from_cube.png">
 
 
 ### HSL
@@ -83,7 +83,7 @@ HSL 和 HSV 很相似，它们都是面向用户的颜色模型，定义了：�
 
 由 RGB 转换为 HSV 时，设`max`为 r/g/b 中的最大值，`min`为 r/g/b 中的最小值。转换公式如下
 
-<img src="/images/captures/20160922_rgb_to_hsv.png" style="max-width:400px">
+<img src="/images/captures/20160922_rgb_to_hsv.png">
 
 **js 实现如下**
 
@@ -164,7 +164,7 @@ rgb2hsv: function () {
 
 如果饱和度`s ≠ 0`，有如下的计算方式：
 
-<img src="/images/captures/20160922_hsv_to_rgb.png" style="max-width:300px">
+<img src="/images/captures/20160922_hsv_to_rgb.png">
 
 **js 实现如下**
 
