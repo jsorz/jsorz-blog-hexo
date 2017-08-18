@@ -16,8 +16,8 @@ Array 中有几个很实用的函数，比如 `each`, `map`, `filter`, `find`, `
 
 ```
 [].reduce(function (accumulator, currentValue, currentIndex, array) {
-	// do something
-	return accumulator;
+    // do something
+    return accumulator;
 }, initialValueOfAccumulator);
 ```
 
@@ -37,30 +37,30 @@ js 中也有`map`和`reduce`函数，用它俩也能实现 MapReduce，区别是
 ```
 // 一些列文章，数组中每个元素相当于一篇文章的完整字符串
 var articles = [
-	'This is an example of word count.',
-	'This is an example of word count.',
-	'todo...'
+    'This is an example of word count.',
+    'This is an example of word count.',
+    'todo...'
 ];
 
 articles.map(function (content) {
-	// 将每篇文章的字符串都切成单词数组，如果需要预处理（比如剔除某些助动词）也在这时处理
-	var words = content.replace(/[^\w\s]/g, '').split(/\s+/);
-	
-	// 统计该篇文章的 word count
-	var countMap = words.reduce(function (accumulator, word) {
-		accumulator[word] = (accumulator[word] || 0) + 1;
-		return accumulator;
-	}, {});
-	
-	// 返回每篇文章的单词统计
-	return countMap;
-	
+    // 将每篇文章的字符串都切成单词数组，如果需要预处理（比如剔除某些助动词）也在这时处理
+    var words = content.replace(/[^\w\s]/g, '').split(/\s+/);
+
+    // 统计该篇文章的 word count
+    var countMap = words.reduce(function (accumulator, word) {
+        accumulator[word] = (accumulator[word] || 0) + 1;
+        return accumulator;
+    }, {});
+
+    // 返回每篇文章的单词统计
+    return countMap;
+
 }).reduce(function (stats, countMap) {
-	// 将每篇文章的统计结果合并起来
-	for (var word in countMap) {
-		stats[word] = (stats[word] || 0) + countMap[word];
-	}
-	return stats;
+    // 将每篇文章的统计结果合并起来
+    for (var word in countMap) {
+        stats[word] = (stats[word] || 0) + countMap[word];
+    }
+    return stats;
 }, {});
 ```
 
@@ -76,7 +76,7 @@ articles.map(function (content) {
 
 ```
 [[0, 1], [2, 3, 4], [5]].reduce(function (flatten, item) {
-	return flatten.concat(item);
+    return flatten.concat(item);
 }, []);
 ```
 
@@ -85,21 +85,21 @@ articles.map(function (content) {
 ```
 // 对多维数组的 flatten
 var flatten = function (array) {
-	// 如果当前 array 已经是基础类型了，就转成1维数组
-	if (array instanceof Array === false) {
-		return [array];
-	}
-	
-	// 临时空间，它的每个成员都要保证是1维数组
-	var tmps = [];
-	for (var i in array) {
-		tmps.push(flatten(array[i]));
-	}
-	
-	// 利用 reduce 函数可以将形如 [[a], [b, c]] 的数组扁平化成1维数组
-	return tmps.reduce(function (res, item) {
-		return res.concat(item);
-	}, []);
+    // 如果当前 array 已经是基础类型了，就转成1维数组
+    if (array instanceof Array === false) {
+        return [array];
+    }
+
+    // 临时空间，它的每个成员都要保证是1维数组
+    var tmps = [];
+    for (var i in array) {
+        tmps.push(flatten(array[i]));
+    }
+
+    // 利用 reduce 函数可以将形如 [[a], [b, c]] 的数组扁平化成1维数组
+    return tmps.reduce(function (res, item) {
+        return res.concat(item);
+    }, []);
 };
 
 flatten([0, 1, 2, 3, 4, 5]);
