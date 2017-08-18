@@ -110,6 +110,9 @@ flatten([[[0, 1]], [2, [3, 4]], [[[5]]]]);
 
 如果需要从右向左的顺序 flatten 处理，则可使用 [reduceRight](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduceRight) 代替 reduce
 
+当然，这个多维数组的例子有点刻意使用 reduce 的感觉，只要使用递归，其中 reduce 可以用 `tmps = tmps.concat(flatten(array[i]))` 代替。
+
+
 ### 统计节点标签数
 
 另一个实用例子是统计一个页面中所有的节点数，利用 `document.getElementsByTagName('*')` 可取出所有节点的 [HTMLCollection](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCollection)，再配合 map 和 reduce 函数就可轻松统计出各 tagName 的数目。
