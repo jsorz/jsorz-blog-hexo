@@ -2,7 +2,7 @@
 layout: post
 title: "mooctest项目总结"
 category: 开发
-tags: [泛型编程, Testing]
+tags: [泛型编程, Mooctest]
 ---
 
 [慕测平台](http://mooctest.net)（简称mooctest），这个项目致力于编程类考试和练习的服务平台，教师可以轻松监管考试流程，学生可以自由练习编程。系统负责编程练习的自动化评估及可视化展现，配合当下红火的MOOC慕课课程，慕测平台将是学生自学编程的好帮手。目前已支持的编程类型有：Java覆盖测试，Java测试驱动编程，Python统计编程，C++编程，Jmeter性能测试，以及Android应用测试。之所以叫“mooctest”是因为“测试”是我们的主打产品，其中Java覆盖测试、Java Debug分析，以及Android应用测试是我们的核心服务。我们帮助高校的教“软件测试”的老师便捷地组织在线考试，帮助高校的学生接触到工业界真实的app案例，以提高学生的testing能力。
