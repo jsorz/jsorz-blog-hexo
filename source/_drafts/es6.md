@@ -109,9 +109,73 @@ x // null
 
 ### 模板字符串
 
+- 模板字符串中嵌入变量，需要将变量名写在`${}`之中。
+- 大括号内部可以放入任意的JavaScript表达式，可以进行运算，以及引用对象属性。
+- 模板字符串之中还能调用函数
+
+高级用法
+
+```
+const tmplFn = addrs => `
+  <table>
+  ${addrs.map(addr => `
+    <tr><td>${addr.first}</td></tr>
+    <tr><td>${addr.last}</td></tr>
+  `).join('')}
+  </table>
+`;
+```
+
+模板编译
+
+```
+var template = `
+<ul>
+  <% for(var i=0; i < data.supplies.length; i++) { %>
+    <li><%= data.supplies[i] %></li>
+  <% } %>
+</ul>
+`;
+
+function compile(template){
+  var evalExpr = /<%=(.+?)%>/g;
+  var expr = /<%([\s\S]+?)%>/g;
+
+  template = template
+    .replace(evalExpr, '`); \n  echo( $1 ); \n  echo(`')
+    .replace(expr, '`); \n $1 \n  echo(`');
+
+  template = 'echo(`' + template + '`);';
+
+  var script =
+  `(function parse(data){
+    var output = "";
+
+    function echo(html){
+      output += html;
+    }
+
+    ${ template }
+
+    return output;
+  })`;
+
+  return script;
+}
+```
 
 
 ## 正则的扩展
 
-TODO
+*以下非 es6 新增*
+
+正则表达式中，点`.`是一个特殊字符，代表任意的单个字符，但是行终止符（line terminator character）除外。以下四个字符属于”行终止符“：
+
+- U+000A 换行符`\n`
+- U+000D 回车符`\r`
+- U+2028 行分隔符（line separator）
+- U+2029 段分隔符（paragraph separator）
+
+但是，很多时候我们希望匹配的是任意单个字符，有一种变通的写法`[^]`
+
 
