@@ -179,3 +179,55 @@ function compile(template){
 但是，很多时候我们希望匹配的是任意单个字符，有一种变通的写法`[^]`
 
 
+## 数值的扩展
+
+新增
+
+- Number.isFinite()
+- Number.isNaN()
+- Number.parseInt()
+- Number.parseFloat()
+- Number.isInteger()
+- Number.EPSILON `2.220446049250313e-16`
+- Number.isSafeInteger() `-2^53 ~ 2^53`
+
+
+## 函数的扩展
+
+### 函数参数的默认值
+
+- 参数变量是默认声明的，所以不能用`let`或`const`再次声明。
+- 参数默认值不是传值的，而是每次都重新计算默认值表达式的值。
+	- 也就是说，参数默认值是惰性求值的。
+
+```
+let x = 99;
+function foo(p = x + 1) {
+  console.log(p);
+}
+
+foo() // 100
+
+x = 100;
+foo() // 101
+```
+
+### rest 参数
+
+rest 参数搭配的变量是一个数组，该变量将多余的参数放入数组中。
+
+```
+// arguments变量的写法
+function sortNumbers() {
+  return Array.prototype.slice.call(arguments).sort();
+}
+
+// rest参数的写法
+const sortNumbers = (...numbers) => numbers.sort();
+```
+
+注意
+
+- rest 参数之后不能再有其他参数（即只能是最后一个参数），否则会报错。
+- 函数的`length`属性，不包括 rest 参数。
+
