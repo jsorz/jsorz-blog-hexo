@@ -91,3 +91,10 @@ git revert commit_id
 reset 是在正常的 commit 历史，删除了指定的 commit，这时 HEAD 是向后移动了。而 revert 是在正常的 commit 历史中再 commit 一次，只不过是反向提交，它的 HEAD 是一直向前的。
 
 如果在日后现有分支和历史分支需要合并的时候，reset 恢复部分的代码依然会出现在历史分支里，但是 revert 方式提交的 commit 并不会出现在历史分支里。
+
+
+### 参考
+
+图解Git：[https://marklodato.github.io/visual-git-guide/index-en.html](https://marklodato.github.io/visual-git-guide/index-en.html)
+
+官方手册：[https://git-scm.com/book/zh/v2/](https://git-scm.com/book/zh/v2/)
