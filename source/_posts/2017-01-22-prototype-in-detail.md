@@ -8,6 +8,6 @@ tags: [mark]
 
 来自一个[知乎上的讨论](https://www.zhihu.com/question/34183746) Mark key points here.
 
-<!-- break -->
+<!-- more -->
 
 <img src="/images/captures/20170122_proto.jpg">

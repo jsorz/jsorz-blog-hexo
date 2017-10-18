@@ -5,7 +5,51 @@ category: css
 tags: [css, 常用片段]
 ---
 
+<!-- more -->
+
 <img src="/images/captures/20171011_dom_position.jpg">
+
+```
+    const box = el.getBoundingClientRect();
+      
+    pos.top = Math.floor(box.top) + Math.max(doc.documentElement.scrollTop, doc.body.scrollTop);
+    pos.left = Math.floor(box.left) + Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft);
+
+    pos.top -= doc.documentElement.clientTop;
+    pos.left -= doc.documentElement.clientLeft;
+
+```
+
+```
+const getOffset = el => {
+  let top = 0;
+  let left = 0;
+  let target = el;
+
+  while (target.offsetParent) {
+    top += target.offsetTop;
+    left += target.offsetLeft;
+    target = target.offsetParent;
+  }
+  return { top, left };
+};
+
+const getPosition = el => {
+  if (el === document.documentElement) {
+    return {
+      top: 0,
+      left: 0
+    };
+  }
+
+  const box = el.getBoundingClientRect();
+  return {
+    top: Math.floor(box.top + window.pageYOffset),
+    left: Math.floor(box.left + window.pageXOffset)
+  };
+};
+```
+
 
 ```
 /**

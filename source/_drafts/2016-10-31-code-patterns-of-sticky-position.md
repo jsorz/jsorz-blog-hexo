@@ -5,6 +5,7 @@ category: css
 tags: [css, 常用片段]
 ---
 
+<!-- more -->
 
 [position sticky 定义](http://www.ghugo.com/position-sticky-how-to-use/)
 

@@ -4,6 +4,7 @@ category: algorithm
 tags: [array]
 ---
 
+<!-- more -->
 
 underscore 实现
 
