@@ -10,7 +10,7 @@ tags: [web组件, AMD]
 
 <!-- break -->
 
-<img src="/assets/captures/20170305_code_stats.png" style="max-width:800px;">
+<img src="/images/captures/20170305_code_stats.png" style="max-width:800px;">
 
 业务背景
 -------
