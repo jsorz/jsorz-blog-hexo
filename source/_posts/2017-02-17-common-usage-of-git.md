@@ -34,7 +34,7 @@ git merge branch_name 【在一个分支下合并另一个分支上的改动】
 --------
 
 ```
-git reset HEAD file_path 【撤消已暂存的文件】
+git rm --cache file_path 【撤消已暂存的文件】
 git checkout -- file_path 【撤消对文件的修改】
 git reset --hard commit_id 【撤消commit】
 git reset --hard HEAD^ 【回退到最新的前一次commit】
