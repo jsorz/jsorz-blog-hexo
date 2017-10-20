@@ -1,8 +1,10 @@
 ---
-title: 再说flatten
-category: algorithm
-tags: [array]
+title: 再看flatten
+category: javascript
+tags: [algorithm]
 ---
+
+前一篇中提到了可利用`reduce`函数做[数组扁平化](/blog/2017/08/make-use-of-reduce.html#数组扁平化)，这里记录下不依赖`reduce`不依赖递归的方法。
 
 <!-- more -->
 

@@ -131,7 +131,18 @@ Array.prototype.slice.call(document.getElementsByTagName('*'))
 
 reduce 内部实现
 ---------------
-reduce 函数是 es5 中的标准，暂时先从 MDN 上抄了一份 Polyfill，供学习用。
+根据 reduce 函数的定义，可以简单这样实现（仅供学习使用）
+
+```
+Array.prototype.reduce = function (iterator, accumulator) {
+  for (var i = 0; i < this.length; i++) {
+    accumulator = iterator(accumulator, this[i], i, this);
+  }
+  return accumulator;
+}
+```
+
+reduce 函数是 es5 中的标准，从 MDN 上抄了一份 Polyfill（可用于生产环境）
 
 ```
 // Production steps of ECMA-262, Edition 5, 15.4.4.21
@@ -150,7 +161,7 @@ if (!Array.prototype.reduce) {
       }
 
       // 1. Let O be ? ToObject(this value).
-      var o = Object(this);
+      var o = (Objectthis);
 
       // 2. Let len be ? ToLength(? Get(O, "length")).
       var len = o.length >>> 0; 
@@ -198,5 +209,3 @@ if (!Array.prototype.reduce) {
   });
 }
 ```
-
-再用自己的理解写1份实现，对比下与官方版本的差距 TODO
