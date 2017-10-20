@@ -2,6 +2,9 @@
   "name": "jsorz-blog-hexo",
   "version": "0.0.1",
   "private": true,
+  "scripts": {
+    "pub": "hexo clean && hexo g && hexo d"
+  },
   "hexo": {
     "version": "3.3.9"
   },
