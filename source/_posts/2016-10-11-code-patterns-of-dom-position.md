@@ -1,5 +1,5 @@
 ---
-title: 元素position与offset
+title: 常用模式片段之元素偏移量
 category: css
 tags: [css, 常用片段]
 ---
@@ -27,9 +27,9 @@ function getOffset(el) {
 
 思路就是取元素`offsetTop`和`offsetLeft`，然后使用`offsetParent`逐层向上直到根元素，这样就取出了相对于页面左上角的偏移。
 
-<img src="/images/captures/20171011_dom_position.jpg">
+<img src="/images/captures/20161011_dom_position.jpg">
 
-###clientRect 法
+### clientRect 法
 
 [getBoundingClientRect](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect) 取出的是元素相对于视窗的距离，那么再加上页面滚动条的偏移，就可以求出元素相对于页面左上角的距离。
 
@@ -67,51 +67,59 @@ function getOffset(el) {
 
 源码参见[https://github.com/jquery/jquery/blob/1.7.2/src/offset.js#L7](https://github.com/jquery/jquery/blob/1.7.2/src/offset.js#L7)，而在1.9版本中简化了其实现[https://github.com/jquery/jquery/blob/1.9.1/src/offset.js#L1](https://github.com/jquery/jquery/blob/1.9.1/src/offset.js#L1)
 
-对比下 baidu/tangram 库中的相应实现 
+对比下 baidu/tangram 库中的相应实现
 
 ```
 baidu.dom.extend({
-    offset: function(){
-        
-        function setOffset(ele, options, index){
-            var tang = tang = baidu.dom(ele),
-                position = tang.getCurrentStyle('position');
-            position === 'static' && (ele.style.position = 'relative');
-            var currOffset = tang.offset(),
-                currLeft = tang.getCurrentStyle('left'),
-                currTop = tang.getCurrentStyle('top'),
-                calculatePosition = (~'absolute|fixed'.indexOf(position)) && ~('' + currLeft + currTop).indexOf('auto'),
-                curPosition = calculatePosition && tang.position();
-            currLeft = curPosition && curPosition.left || parseFloat(currLeft) || 0;
-            currTop = curPosition && curPosition.top || parseFloat(currTop) || 0;
-            baidu.type('options') === 'function' && (options = options.call(ele, index, currOffset));
-            options.left != undefined && (ele.style.left = options.left - currOffset.left + currLeft + 'px');
-            options.top != undefined && (ele.style.top = options.top - currOffset.top + currTop + 'px');
+  offset: function() {
+
+    function setOffset(ele, options, index) {
+      var tang = tang = baidu.dom(ele),
+      position = tang.getCurrentStyle('position');
+      position === 'static' && (ele.style.position = 'relative');
+      var currOffset = tang.offset(),
+      currLeft = tang.getCurrentStyle('left'),
+      currTop = tang.getCurrentStyle('top'),
+      calculatePosition = (~'absolute|fixed'.indexOf(position)) && ~ ('' + currLeft + currTop).indexOf('auto'),
+      curPosition = calculatePosition && tang.position();
+      currLeft = curPosition && curPosition.left || parseFloat(currLeft) || 0;
+      currTop = curPosition && curPosition.top || parseFloat(currTop) || 0;
+      baidu.type('options') === 'function' && (options = options.call(ele, index, currOffset));
+      options.left != undefined && (ele.style.left = options.left - currOffset.left + currLeft + 'px');
+      options.top != undefined && (ele.style.top = options.top - currOffset.top + currTop + 'px');
+    }
+
+    return function(options) {
+      if (options) {
+        baidu.check('^(?:object|function)$', 'baidu.dom.offset');
+        for (var i = 0,
+        item; item = this[i]; i++) {
+          setOffset(item, options, i);
         }
-        
-        return function(options){
-            if(options){
-                baidu.check('^(?:object|function)$', 'baidu.dom.offset');
-                for(var i = 0, item; item = this[i]; i++){
-                    setOffset(item, options, i);
-                }
-                return this;
-            }
-            var ele = this[0],
-                doc = this.getDocument(),
-                box = {left: 0, top: 0},
-                win, docElement;
-            if(!doc){return;}
-            docElement = doc.documentElement;
-            if(!baidu._util_.contains(docElement, ele)){return box;}
-            (typeof ele.getBoundingClientRect) !== 'undefined' && (box = ele.getBoundingClientRect());
-            win = this.getWindow();
-            return {
-                left: box.left + (win.pageXOffset || docElement.scrollLeft) - (docElement.clientLeft || 0),
-                top: box.top  + (win.pageYOffset || docElement.scrollTop)  - (docElement.clientTop  || 0)
-            };
-        }
-    }()
+        return this;
+      }
+      var ele = this[0],
+      doc = this.getDocument(),
+      box = {
+        left: 0,
+        top: 0
+      },
+      win,
+      docElement;
+      if (!doc) {
+        return;
+      }
+      docElement = doc.documentElement;
+      if (!baidu._util_.contains(docElement, ele)) {
+        return box;
+      } (typeof ele.getBoundingClientRect) !== 'undefined' && (box = ele.getBoundingClientRect());
+      win = this.getWindow();
+      return {
+        left: box.left + (win.pageXOffset || docElement.scrollLeft) - (docElement.clientLeft || 0),
+        top: box.top + (win.pageYOffset || docElement.scrollTop) - (docElement.clientTop || 0)
+      };
+    }
+  } ()
 });
 ```
 
