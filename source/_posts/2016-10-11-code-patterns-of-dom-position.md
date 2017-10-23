@@ -1,7 +1,7 @@
 ---
 title: 常用模式片段之元素偏移量
-category: css
-tags: [css, 常用片段]
+category: javascript
+tags: [javascript, 常用片段]
 ---
 
 获取元素相对于页面左上角的位置，是比较常用的需求。比如将一个浮层元素定位到当前操作的元素附近，就需要计算当前操作的元素相对于页面左上角的位置，然后将浮层元素也绝对定位到该位置附近。
@@ -44,14 +44,14 @@ function getOffset(el) {
   let left = 0;
 
   if (window.pageYOffset !== undefined) {
-	top = Math.floor(box.top + window.pageYOffset);
+    top = Math.floor(box.top + window.pageYOffset);
     left = Math.floor(box.left + window.pageXOffset);
   }
   else {
-  	// 有个 bad case 即当HTML或者BODY元素有 border width 时，会有偏差
-  	top = Math.floor(box.top) + Math.max(doc.documentElement.scrollTop, doc.body.scrollTop);
+    // 有个 bad case 即当HTML或者BODY元素有 border width 时，会有偏差
+    top = Math.floor(box.top) + Math.max(doc.documentElement.scrollTop, doc.body.scrollTop);
     left = Math.floor(box.left) + Math.max(doc.documentElement.scrollLeft, doc.body.scrollLeft);
-
+    
     top -= doc.documentElement.clientTop;
     left -= doc.documentElement.clientLeft;
   }
