@@ -1,6 +1,6 @@
 ---
 title: RN License 更改
-category: 开发
+category: News
 tags: [News]
 ---
 
