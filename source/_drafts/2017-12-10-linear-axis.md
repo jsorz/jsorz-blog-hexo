@@ -1,7 +1,7 @@
 ---
 title: 如何画一个坐标轴
 category: 绘图
-tags: [algorithm]
+tags: [chart]
 ---
 
 driven by Charts

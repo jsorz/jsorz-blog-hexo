@@ -42,7 +42,7 @@ JS 中的原型继承方式**并不能支持多继承**，因为每个构造器�
 
 
 
-Dojo http://driftcloudy.iteye.com/blog/909160
+Dojo多继承 http://driftcloudy.iteye.com/blog/909160
 
 ```
 var A = declare(null, {
@@ -69,6 +69,8 @@ console.log(b.isInstanceOf(A)); // false
 console.log(c.isInstanceOf(A)); // true
 console.log(d.isInstanceOf(A)); // true
 ```
+
+dojo.declare https://github.com/dojo/dojo/blob/master/_base/declare.js#L554
 
 
 
