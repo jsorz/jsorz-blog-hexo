@@ -15,12 +15,12 @@ RAF(requestAnimationFrame) 在好多地方都有见到过，只知道它和浏�
 
 ```
 var raf = window.requestAnimationFrame
-        || window.webkitRequestAnimationFrame
-        || window.mozRequestAnimationFrame
-        || function(callback) {
-    		// 保证 60fps 帧率的流畅效果，每帧间隔 16.7 ms
-            window.setTimeout(callback, 1000 / 60);
-        };
+    || window.webkitRequestAnimationFrame
+    || window.mozRequestAnimationFrame
+    || function(callback) {
+        // 保证 60fps 帧率的流畅效果，每帧间隔 16.7 ms
+        window.setTimeout(callback, 1000 / 60);
+    };
 ```
 
 第一印象：这货和动画有关，and 这货可以用 `setTimeout` 来模拟。
@@ -60,20 +60,20 @@ RAF 既然这么好的东西，显然是存在兼容问题的，在上面 [MDN](
         window.cancelAnimationFrame = window[vendors[x] + 'CancelAnimationFrame'] || window[vendors[x] + 'CancelRequestAnimationFrame'];
     }
     if (!window.requestAnimationFrame) {
-	    window.requestAnimationFrame = function(callback, element) {
-	        var currTime = new Date().getTime();
-	        var timeToCall = Math.max(0, 16 - (currTime - lastTime));
-	        var id = window.setTimeout(function() {
-	            callback(currTime + timeToCall);
-	        }, timeToCall);
-	        lastTime = currTime + timeToCall;
-	        return id;
-	    };
+      window.requestAnimationFrame = function(callback, element) {
+          var currTime = new Date().getTime();
+          var timeToCall = Math.max(0, 16 - (currTime - lastTime));
+          var id = window.setTimeout(function() {
+              callback(currTime + timeToCall);
+          }, timeToCall);
+          lastTime = currTime + timeToCall;
+          return id;
+      };
     }
     if (!window.cancelAnimationFrame) {
-	    window.cancelAnimationFrame = function(id) {
-	        clearTimeout(id);
-	    };
+      window.cancelAnimationFrame = function(id) {
+          clearTimeout(id);
+      };
     }
 }());
 ```
@@ -141,29 +141,29 @@ self.timer = setTimeout(function () {
 ```
 var __lazyLoaded = false;
 function runLazyQueue() {
-	if(__lazyLoaded) {
-		return;
-	}
-	__lazyLoaded = true;
-	  
-	$(window).detach("mousemove scroll mousedown touchstart touchmove keydown resize onload", runLazyQueue);
+  if(__lazyLoaded) {
+    return;
+  }
+  __lazyLoaded = true;
+    
+  $(window).detach("mousemove scroll mousedown touchstart touchmove keydown resize onload", runLazyQueue);
 
-	var module;
-	while (module = lazyQueue.shift()) {
-		~function(m){
-			// 保证在浏览器空闲时间处理 JS 程序, 保证不阻塞
-			window.requestAnimationFrame(function() {
-				new Loader(m.$mod, m.data, m.force);
-			});
-		}(module);
-	}
+  var module;
+  while (module = lazyQueue.shift()) {
+    ~function(m){
+      // 保证在浏览器空闲时间处理 JS 程序, 保证不阻塞
+      window.requestAnimationFrame(function() {
+        new Loader(m.$mod, m.data, m.force);
+      });
+    }(module);
+  }
 }
 
 $(window).on("mousemove scroll mousedown touchstart touchmove keydown resize onload", runLazyQueue);
 
 // 担心未触发 onload 事件, 5s 之后执行懒加载队列
 window.requestAnimationFrame(function() {
-	runLazyQueue();
+  runLazyQueue();
 }, 5000);
 ```
 
@@ -194,16 +194,16 @@ $box.on('mousemove', function(e){
 
 ```
 $(function(){
-	var lazyLoadList = [A, B, C, D];
-	var load = function() {
-		var module = lazyLoadList.shift();
-		if(module) {
-			new module();
-			// 要写个递归，才能真正保证一个模块加载完再执行下一个模块
-			window.requestAnimationFrame(load);
-		}
-	}
-	window.requestAnimationFrame(load);
+  var lazyLoadList = [A, B, C, D];
+  var load = function() {
+    var module = lazyLoadList.shift();
+    if(module) {
+      new module();
+      // 要写个递归，才能真正保证一个模块加载完再执行下一个模块
+      window.requestAnimationFrame(load);
+    }
+  }
+  window.requestAnimationFrame(load);
 })
 ```
 
@@ -211,4 +211,5 @@ $(function(){
 
 - 天猫实习时组里的大神博客：[http://www.ghugo.com/requestanimationframe-best-practice/](http://www.ghugo.com/requestanimationframe-best-practice/)
 - 详细的实验对比文章：[https://www.404forest.com/2016/08/15/使用%20requestAnimationFrame%20实现性能优化与懒执行/](https://www.404forest.com/2016/08/15/使用%20requestAnimationFrame%20实现性能优化与懒执行/)
+
 
