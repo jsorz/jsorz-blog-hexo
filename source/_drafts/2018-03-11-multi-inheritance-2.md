@@ -1,5 +1,5 @@
 ---
-title: JS中的“多继承”(1)
+title: JS中的“多继承”(2)
 category: javascript
 tags: [javascript]
 ---
@@ -205,9 +205,7 @@ javascript 很容易模拟一个“类”，并且可以一定程度上做到面
 
 ## 试试多继承
 
-
-
-Java 多继承时推荐使用 Interface
+贪心是人之常情，有了继承后，我们就会想要“多继承”。即使在后端语言中，也没有几个语言能真正实现多继承，笔者只知道 C++ 和 python 提供了多继承的语法，而像 Java 只允许继承一个父类，但可以 `implements` 多个接口类，也算一种变相的多继承。
 
 
 
