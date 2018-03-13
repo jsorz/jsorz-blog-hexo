@@ -54,7 +54,7 @@ Book.prototype.publicSharedMethod = function() {};
 
 
 
-有了【封装】之后，我们就要考虑【继承】了。javascript 也没有这样的机制，也只能使用 `prototype` 去模拟，实现方式有很多，出现了各种各样的“继承”方法。原型式继承、类式继承，甚至模拟`super`关键字，提供 `Class.extend()`、`this.super()` 等便利的用法，都是运用闭包和 `prototype` 实现的 Syntactic sugar。这也就是过去 [Prototype.js](http://prototypejs.org/learn/class-inheritance) 这样的库对前端产生的影响。
+有了【封装】之后，我们就要考虑【继承】了。javascript 也没有继承的机制，都是使用 `prototype` 去模拟，实现方式有很多，出现了各种各样的“继承”方法。原型式继承、类式继承，甚至模拟`super`关键字，提供 `Class.extend()`、`this.super()` 等便利的用法，都是运用闭包和 `prototype` 实现的 Syntactic sugar。这也就是过去 [Prototype.js](http://prototypejs.org/learn/class-inheritance) 这样的库对前端产生的影响。
 
 
 
@@ -199,6 +199,8 @@ function _inherits(subClass, superClass) {
 
 ### 小结
 
-javascript 很容易模拟一个“类”，并且可以一定程度上做到面向对象中的三大特性：封装、继承、多态。从最初去模拟一个“类”，到 ES5 提供更便捷的原型操控API，到 ES6 中提供更多“类”相关的关键字，都是在帮我们减小 javascript 中面向对象的使用成本，使它看起来像跟它没有半毛钱关系的 Java 语言。当然，javascript 本身就是弱类型的脚本语言，相比强类型肯定还有很多实现不了的地方，比如 Java 中的 abstract class、Interface 等，只能通过一些 tricky 的办法去模拟。而 javascript 没有可见性修饰符，因此对变量属性的 accessibility 方面更多地依赖命名约束。
+javascript 很容易模拟一个“类”，并且可以一定程度上做到面向对象中的三大特性：封装、继承、多态。从最初去模拟一个“类”，到 ES5 提供更便捷的原型操控API，到 ES6 中提供更多“类”相关的关键字，都是在帮我们减小 javascript 中面向对象的使用成本，使它看起来像跟它没有半毛钱关系的 Java 语言。
+
+虽然 javascript 中的“继承”并不是真正的继承，“类”也不是真正的“类”，相比 Java 肯定还有很多实现不了的地方，比如 abstract class、Interface 等，只能通过一些 tricky 的办法去模拟。因此 javascript 中所谓的“继承”，是为了方便程序员用面向对象的方式来组织代码。
 
 
