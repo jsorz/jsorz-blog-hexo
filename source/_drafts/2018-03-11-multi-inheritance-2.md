@@ -1,5 +1,5 @@
 ---
-title: JS中的“多继承”(2)
+title: JS中的“多继承”-(2)
 category: javascript
 tags: [javascript]
 ---
@@ -220,8 +220,6 @@ extend 一个类，其余 mixin 方式
 ### 多继承要解决的问题
 
 1、instanceof 多态
-
-2、override, protected
 
 **3、Method Resolution Order**
 
