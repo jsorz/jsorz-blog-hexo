@@ -4,7 +4,7 @@ category: javascript
 tags: [javascript]
 ---
 
-首先 javascript 中**不存在多继承**，并且也不推荐频繁使用继承。如果你也这么认为的话，那笔者的观点也就写完啦 233333…. 如果还想回顾下 javascript 中“继承”的前世今生，以及对“多继承”的讨论，不妨看下去。
+首先 javascript 中**不存在多继承**，并且也不推荐使用继承。如果你也这么认为的话，那笔者的观点也就写完啦 233333…. 如果还想回顾下 javascript 中“继承”的前世今生，以及对“多继承”的讨论，不妨看下去。
 
 （接上一篇）
 
@@ -34,7 +34,7 @@ c instanceof B  // true
 
 这还不算啥，请看下一张图
 
-<img src="/images/captures/20180311_diamond_inheritanc.png">
+<img src="/images/captures/20180311_diamond_inherit.png">
 
 这是多继承中典型的问题，称为 Diamond Problem，当 A, B, C 中都定义了一个相同名称的函数时，而在 D 的实例对象中调用这个函数时，究竟应该去执行谁。。。
 
@@ -42,25 +42,65 @@ c instanceof B  // true
 
 ### 间接多继承
 
-先退而求其次，我们借鉴下 Java 中的思路，interface
+先退而求其次，我们借鉴了 Java 中的思路，实际只继承一个类，通过其他方式将其他类的功能融入。Java 中可以用 `Interface` 约束一个类应该拥有的行为，当然 javascript 也可以这么做，实现 interface 的语法糖，检查“类”中有没有重写 interface 中的所有函数。但这样的话，interface 除了做校验之用，没有实际意义，不如直接 mixin 的方式更实在。
 
-extend 一个类，其余 mixin 方式
+```
 
-
+```
 
 
 
 ### MRO算法
 
-Method Resolution Order (MRO) 指的是在继承结构中确定方法解析的顺序，即一个函数会按照此顺序
+Method Resolution Order (MRO) 指的是在继承结构中确定类的线性顺序，例如 `C => B => A` 表示 C 继承 B，B 继承 A，那么 C 的 MRO 就是 `C B A`，也就意味着当调用 C 实例中的一个函数时，会按照 `C B A` 的优先级顺序去“寻找”该函数。在单继承的结构中自然没有问题，MRO 是为了解决前面所说的多继承中 Diamond Problem
 
-又被称为[C3算法](https://en.wikipedia.org/wiki/C3_linearization)，在 python 有对其的完整描述，这里简述下算法流程。
+常用的[C3算法](https://en.wikipedia.org/wiki/C3_linearization)就是用来计算 MRO，在 python 文档中有对其的完整描述，这里用一个例子简述下算法流程。
 
+假设现在有这样的多继承结构
 
+<img src="/images/captures/20180311_mro_example.png">
+
+首先引入类的线性顺序的表示方法，在上图中可以看到 `B => Y => O` 这一部分是单继承的结构，显然 B 的 MRO 为 `B Y O`，记为 L(B) = BYO
+
+然后还要引入几个符号，在 MRO 的线性顺序中，用 head 表示第一个元素，用 tail 表示余下部分。例如，`B Y O` 中的 head 就是 `B`，tail 则是 `Y O`。MRO 中只有一个元素，如图中的 O 元素，head 为`O`，tail 则是空。
+
+接下来是最关键的，图中 A 的 MRO 记为 L(A(X, Y))，A(X, Y) 表示 A 同时继承了 X 和 Y，那么
+
+L(A(X, Y)) = A + merge(L(X), L(Y), XY)
+
+其中 merge 的规则如下
 
 ```
-
+取出第一个序列的 head
+如果，该 head 不在其它序列的 tail 中
+	则把这个 head 添加到结果中并从所有的序列中移除它
+否则，用下一个序列的 head 重复上一步
+直到所有序列中的所有元素都被移除（或者无法找到一个符合的head）
 ```
+
+最后我们来计算下上图中各个类的线性顺序
+
+``` 
+L(O) = O
+L(X) = X + L(O) = XO
+L(Y) = Y + L(O) = YO
+L(A) = A + merge(L(X), L(Y), XY)
+	 = A + merge(XO, YO, XY)
+	 = AX + merge(O, YO, Y)
+	 = AXY + merge(O, O)
+	 = AXYO
+L(B) = B + L(Y) = BYO
+L(C) = C + merge(L(A), L(B), AB)
+	 = C + merge(AXYO, BYO, AB)
+	 = CA + merge(XYO, BYO, B)
+	 = CAX + merge(YO, BYO, B)
+	 = CAXB + merge(YO, YO)
+	 = CAXBYO
+```
+
+上述多继承结构的 python 示例可参见 https://glot.io/snippets/ez5bqslav2  输出了 C 这个类的 MRO 即 `C A X B Y O`
+
+当然C3算法也有 bad case，会导致上述的 merge 在中途失败，更多细节可参考 https://www.python.org/download/releases/2.3/mro/  总之不推荐设计出过于复杂的多继承结构 =_=
 
 
 
@@ -108,7 +148,7 @@ dojo.declare https://github.com/dojo/dojo/blob/master/_base/declare.js#L554
 
 
 
-### 为什么不推荐继承
+### 不推荐继承
 
 
 
@@ -128,22 +168,10 @@ https://en.wikipedia.org/wiki/C3_linearization
 
 
 
-[dojo.declare](https://github.com/dojo/dojo/blob/master/_base/declare.js)
-
-http://driftcloudy.iteye.com/blog/909160
-
 http://blog.csdn.net/kittyjie/article/details/72828470
-
-[The Python 2.3 Method Resolution Order](https://www.python.org/download/releases/2.3/mro/)
 
 [ES6 Class Multiple inheritance](https://stackoverflow.com/questions/29879267/es6-class-multiple-inheritance)
 
-
-
-[MDN for Classes](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Classes)
-
 [ES6 中优雅的 mixin 式继承](https://www.h5jun.com/post/mixin-in-es6.html)
-
-
 
 https://segmentfault.com/a/1190000003798438
