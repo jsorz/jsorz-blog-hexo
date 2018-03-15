@@ -42,17 +42,55 @@ c instanceof B  // true
 
 ### 间接多继承
 
-先退而求其次，我们借鉴了 Java 中的思路，实际只继承一个类，通过其他方式将其他类的功能融入。Java 中可以用 `Interface` 约束一个类应该拥有的行为，当然 javascript 也可以这么做，实现 interface 的语法糖，检查“类”中有没有重写 interface 中的所有函数。但这样的话，interface 除了做校验之用，没有实际意义，不如直接 mixin 的方式更实在。
+先退而求其次，我们借鉴了 Java 中的思路，实际只继承一个类，通过其他方式将其他类的功能融入。Java 中可以用 `Interface` 约束一个类应该拥有的行为，当然 javascript 也可以这么做，实现 interface 的语法糖，检查“类”中有没有重写 interface 中的所有函数。但这样的话，interface 除了做校验之用，没有实际意义，不如直接 mixin 的方式来的实在。
 
 ```
+const mixinClass = (base, ...mixins) => {
+  const mixinProps = (target, source) => {
+    Object.getOwnPropertyNames(source).forEach(prop => {
+      if (/constructor/.test(prop)) { return; }
+      Object.defineProperty(target, prop, Object.getOwnPropertyDescriptor(source, prop));
+    })
+  };
+  class Child extends base {
+    constructor(...props) {
+      super(...props);
+    }
+  }
+  mixins.forEach(source => {
+    mixinProps(Child.prototype, source.prototype);
+  });
+  return Child;
+};
 
+class A {
+  methodA() {}
+}
+class B {
+  methodB() {}
+}
+class C extends mixinClass(A, B) {
+  methodA() { console.log('methodA in C'); }
+  methodC() {}
+}
+
+let c = new C();
+c instanceof C  // true
+c instanceof A  // true
+c instanceof B  // false
 ```
+
+这样就简单模拟了间接多继承，通过构造一个中间类，让中间类直接继承 A，并且 mixin 了 B 的原型成员，然后再让 C 去继承这个中间类。由于 B 是通过 mixin 方式浅拷贝了一份，`B.prototype` 并不在 C 的原型链上（`C.__proto__.__proto__`），所以 `c instanceof B` 为 false。
+
+要想修正 instanceof，只能自己另外实现一套 `isInstanceOf()` 的逻辑，在继承时将所有的父类引用记录下来，再去比对。
 
 
 
 ### MRO算法
 
-Method Resolution Order (MRO) 指的是在继承结构中确定类的线性顺序，例如 `C => B => A` 表示 C 继承 B，B 继承 A，那么 C 的 MRO 就是 `C B A`，也就意味着当调用 C 实例中的一个函数时，会按照 `C B A` 的优先级顺序去“寻找”该函数。在单继承的结构中自然没有问题，MRO 是为了解决前面所说的多继承中 Diamond Problem
+针对多继承考虑的第2个问题，前面提到的 Diamond Problem，需要引入一个定义。
+
+Method Resolution Order (MRO) 指的是在继承结构中确定类的线性顺序，例如 `C => B => A` 表示 C 继承 B，B 继承 A，那么 C 的 MRO 就是 `C B A`，也就意味着当调用 C 实例中的一个函数时，会按照 `C B A` 的优先级顺序去“寻找”该函数。在单继承的结构中自然没有问题，而在多继承中 MRO 发挥着其作用。
 
 常用的[C3算法](https://en.wikipedia.org/wiki/C3_linearization)就是用来计算 MRO，在 python 文档中有对其的完整描述，这里用一个例子简述下算法流程。
 
@@ -100,55 +138,35 @@ L(C) = C + merge(L(A), L(B), AB)
 
 上述多继承结构的 python 示例可参见 https://glot.io/snippets/ez5bqslav2  输出了 C 这个类的 MRO 即 `C A X B Y O`
 
-当然C3算法也有 bad case，会导致上述的 merge 在中途失败，更多细节可参考 https://www.python.org/download/releases/2.3/mro/  总之不推荐设计出过于复杂的多继承结构 =_=
+当然C3算法也有 bad case，会导致上述的 merge 在中途失败，也就是无法求出 MRO 的 case。关于 MRO 的更多细节可参考 https://www.python.org/download/releases/2.3/mro/  总之不推荐设计出过于复杂的多继承结构 =_=
 
 
 
 ### 模拟多继承
 
-
-
-Dojo多继承 http://driftcloudy.iteye.com/blog/909160
-
 ```
-var A = declare(null, {
-// constructor, properties, and methods go here
-// ...
-});
-var B = declare(null, {
-// constructor, properties, and methods go here
-// ...
-});
-var C = declare([A, B], {
-// constructor, properties, and methods go here
-// ...
-});
-var D = declare(A, {
-// constructor, properties, and methods go here
-// ...
-});
- 
-var a = new A(), b = new B(), c = new C(), d = new D();
- 
-console.log(a.isInstanceOf(A)); // true
-console.log(b.isInstanceOf(A)); // false
-console.log(c.isInstanceOf(A)); // true
-console.log(d.isInstanceOf(A)); // true
+C = createClass([A, B], {
+  
+})
 ```
 
-dojo.declare https://github.com/dojo/dojo/blob/master/_base/declare.js#L554
+
+
+参考了 dojo 多继承的实现思路 https://github.com/dojo/dojo/blob/master/_base/declare.js#L554
 
 
 
 ## 为什么不建议多继承
 
-我们使用继承的时候，我们需要确信使用继承确实是有效可行的办法。那么到底要不要使用继承呢？《Think in Java》中提供了解决办法：问一问自己是否需要从子类向父类进行向上转型。如果必须向上转型，则继承是必要的，但是如果不需要，则应当好好考虑自己是否需要继承。
 
-用组合的方式来解耦
 
 
 
 ### 不推荐继承
+
+用组合的方式来解耦
+
+我们使用继承的时候，我们需要确信使用继承确实是有效可行的办法。那么到底要不要使用继承呢？想一想应用场景中是否需要从子类向父类进行向上转型。如果必须向上转型，则继承是必要的，但是如果不需要，则应当好好考虑自己是否需要继承。
 
 
 
@@ -167,11 +185,3 @@ https://www.python.org/download/releases/2.3/mro/
 https://en.wikipedia.org/wiki/C3_linearization
 
 
-
-http://blog.csdn.net/kittyjie/article/details/72828470
-
-[ES6 Class Multiple inheritance](https://stackoverflow.com/questions/29879267/es6-class-multiple-inheritance)
-
-[ES6 中优雅的 mixin 式继承](https://www.h5jun.com/post/mixin-in-es6.html)
-
-https://segmentfault.com/a/1190000003798438
