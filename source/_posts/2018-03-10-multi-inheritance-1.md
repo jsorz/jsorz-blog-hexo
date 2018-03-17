@@ -50,7 +50,7 @@ Book.staticMethod = function() {};
 Book.prototype.publicSharedMethod = function() {};
 ```
 
-这样的代码想必都很面熟，借鉴了强类型语言中的“类”的概念，既然是类，它除了封装一些属性和方法，还需要做到可见性的控制。由于 javascript 中没有[可见性修饰符](#)，只能用闭包来模拟 public 与 private。虽然比起 Java 中的类还有很多不足，但至少做到了一些封装，而且通常我们还可以建立命名规范，约定下划线开头的属性名或方法名为私有的。
+这样的代码想必都很面熟，借鉴了强类型语言中的“类”的概念，既然是类，它除了封装一些属性和方法，还需要做到可见性的控制。由于 javascript 中没有[可见性修饰符](https://en.wikipedia.org/wiki/Access_modifiers)，只能用闭包来模拟 public 与 private。虽然比起 Java 中的类还有很多不足，但至少做到了一些封装，而且通常我们还可以建立命名规范，约定下划线开头的属性名或方法名为私有的。
 
 
 
