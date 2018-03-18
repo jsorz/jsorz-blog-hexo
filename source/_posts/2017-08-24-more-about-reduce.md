@@ -78,8 +78,10 @@ class Task{
     }
     plugins.sort((a, b) => a.id - b.id);
 
+	// 关键在这里
     let entrace = plugins
       .map(plugin => plugin.functor.bind(this, ...args))
+      // 注意无 initialValue 时, a指向前一个函数，作为参数传入b
       .reduceRight((a, b) => b.bind(this, a));
 
     entrace();
