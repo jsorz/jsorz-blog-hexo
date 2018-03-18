@@ -68,7 +68,7 @@ articles.map(function (content) {
 运用场景举例
 -----------
 
-### 数组扁平化
+### 1. 数组扁平化
 
 题目：将形如 `[[0, 1], [2, 3, 4], [5]]` 的数组转成扁平结构的一维数组 `[0, 1, 2, 3, 4, 5]`。
 
@@ -112,8 +112,36 @@ flatten([[[0, 1]], [2, [3, 4]], [[[5]]]]);
 
 当然，这个多维数组的例子有点刻意使用 reduce 的感觉，只要使用递归，其中 reduce 可以用 `tmps = tmps.concat(flatten(array[i]))` 代替。
 
+顺便附上 flatten 函数的 underscore 实现版本（非递归实现）
 
-### 统计节点标签数
+```
+// Internal implementation of a recursive `flatten` function.
+var flatten = function(input, shallow, strict, output) {
+    output = output || [];
+    var idx = output.length;
+    for (var i = 0, length = getLength(input); i < length; i++) {
+        var value = input[i];
+        if (isArrayLike(value) && (_.isArray(value) || _.isArguments(value))) {
+            // Flatten current level of array or arguments object.
+            if (shallow) {
+                var j = 0, len = value.length;
+                while (j < len) output[idx++] = value[j++];
+            } else {
+                flatten(value, shallow, strict, output);
+                idx = output.length;
+            }
+        } else if (!strict) {
+            output[idx++] = value;
+        }
+    }
+    return output;
+}
+```
+
+
+
+
+### 2. 统计节点标签数
 
 另一个实用例子是统计一个页面中所有的节点数，利用 `document.getElementsByTagName('*')` 可取出所有节点的 [HTMLCollection](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCollection)，再配合 map 和 reduce 函数就可轻松统计出各 tagName 的数目。
 
