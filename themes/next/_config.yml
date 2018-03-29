@@ -142,7 +142,8 @@ font:
 # Value is the target link (E.g. GitHub: https://github.com/iissnan)
 social:
   GitHub: https://github.com/jsorz
-  Weibo: http://weibo.com/u/2297163921
+  #Weibo: http://weibo.com/u/2297163921
+  知乎: https://www.zhihu.com/people/a-mou-36-48
 
 
 # Social Links Icons
@@ -155,8 +156,8 @@ social_icons:
   # Icon Mappings.
   # KeyMapsToSocialItemKey: NameOfTheIconFromFontAwesome
   GitHub: github
-  Twitter: twitter
-  Weibo: weibo
+  #Weibo: weibo
+  知乎: zhihu
 
 
 # Sidebar Avatar
@@ -210,12 +211,12 @@ sidebar:
 
 
 # Blog rolls
-#links_title: Links
-#links_layout: block
+links_title: 博客推荐
+links_layout: block
 #links_layout: inline
-#links:
-  #Title: http://example.com/
-
+links:
+  xiaOp的博客: https://xiaoiver.github.io/
+  halfrost: https://www.jianshu.com/u/12201cdd5d7a
 
 # ---------------------------------------------------------------
 # Post Settings
