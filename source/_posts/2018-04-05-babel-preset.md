@@ -129,9 +129,9 @@ plugins / presets 编译顺序
 
 
 
-| 使用方式                                  | 优点   | 缺点                           |
-| ------------------------------------- | ---- | ---------------------------- |
-| 在<script>前插入 babel-polyfill 的CDN文件    | 大而全  | 打包过程无法参与，无法做 tree shaking 优化 |
-| 在 webpack entry 中第一个插入 babel-polyfill | 大而全  | 打包后文件体积增大                    |
-| 在入口文件引入 core-js 自行取所需                 | 最小化  | 以后会不断追加所需，容易遗漏               |
+| 使用方式                                     | 优点   | 缺点                           |
+| ---------------------------------------- | ---- | ---------------------------- |
+| 在`<script>`前插入 babel-polyfill 的CDN文件     | 大而全  | 打包过程无法参与，无法做 tree shaking 优化 |
+| 在 webpack entry 中第一个插入 babel-polyfill    | 大而全  | 打包后文件体积增大                    |
+| 在入口文件引入 [core-js](https://github.com/zloirock/core-js#commonjs) 自行取所需 | 最小化  | 以后会不断追加所需，容易遗漏               |
 
