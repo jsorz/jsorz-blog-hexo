@@ -1,7 +1,7 @@
 ---
 title: JavaScript中的“多继承”(2)
 category: javascript
-tags: [javascript]
+tags: [javascript, es]
 ---
 
 首先 JavaScript 中**不存在多继承**，并且也不推荐使用继承。如果你也这么认为的话，那笔者的观点也就写完啦 233333…. 如果还想回顾下 JavaScript 中“继承”的前世今生，以及对“多继承”的讨论，不妨看下去。
