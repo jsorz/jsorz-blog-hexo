@@ -9,7 +9,7 @@ tags: [胡思乱想]
 
 <!-- more -->
 
-## 原点
+## Origin
 
 回顾自己的学习经历，似乎涉及过很多面，但看着又像一片空白。
 
@@ -33,4 +33,35 @@ tags: [胡思乱想]
 
 
 
-## ？
+## Smash
+
+前端火了三四年了，也赶上了移动互联网时代，变化是一直存在的，跟上变化是必然的，否则相当于主动退出。
+
+要想突破原点，我认为有以下几个入口
+
+### 1、极致体验
+
+
+
+### 2、工程效率
+
+
+
+### 3、跨界交叉
+
+
+
+### 4、智能可穿戴设备
+
+
+
+## Jobs
+
+
+
+> You can't connect the dots looking forward, you can only connect them looking backwards.
+
+
+
+> Your work is going to fill a large part of your life, and the only way to be truly satisfied is to do what you believe is great work. And the only way to do great work is to love what you do.
+
