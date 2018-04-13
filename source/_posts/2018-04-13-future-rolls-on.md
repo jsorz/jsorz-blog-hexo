@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "2018未来在哪儿"
-category: 思考
+category: 吹水
 tags: [胡思乱想]
 ---
 

@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "实习小想"
-category: 思考
+category: 吹水
 tags: [胡思乱想]
 ---
 

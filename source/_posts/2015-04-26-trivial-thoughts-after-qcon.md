@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "QCon2015感想"
-category: 思考
+category: 吹水
 tags: [前端, 胡思乱想]
 ---
 

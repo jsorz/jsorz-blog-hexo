@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "前端要给力 — 平凡之路"
-category: 思考
+category: 吹水
 tags: [前端]
 ---
 

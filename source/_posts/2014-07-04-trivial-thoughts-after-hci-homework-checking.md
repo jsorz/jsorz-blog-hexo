@@ -1,7 +1,7 @@
 ---
 layout: post
 title: "人机交互作业检查的一点感想——暨前端阶段总结"
-category: 思考
+category: 吹水
 tags: [前端, 胡思乱想]
 ---
 
