@@ -1,6 +1,5 @@
 ---
-layout: post
-title: "再也不想写表单了"
+title: 再也不想写表单了
 category: 开发
 tags: [web组件]
 ---
