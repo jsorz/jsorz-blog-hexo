@@ -12,24 +12,26 @@ tags: [javascript, 面试]
 题目是这样的
 --------------
 
-    var a = 0;
+```js
+var a = 0;
 
-    function one(){
-        for(var i=0; i<10; i++){
-            setTimeout(function(){
-                a += i;
-            }, 0);
-        }
-    }
-
-    function two(){
+function one(){
+    for(var i=0; i<10; i++){
         setTimeout(function(){
-            alert(a);
+            a += i;
         }, 0);
     }
+}
 
-    one();
-    two();
+function two(){
+    setTimeout(function(){
+        alert(a);
+    }, 0);
+}
+
+one();
+two();
+```
 
 问：当弹出alert框时里面的值是多少？
 
@@ -59,25 +61,29 @@ setTimeout与setInterval
 --------------------------
 如上图所示，当我们把一个function放到setTimeout中后，该function相当于被加到了图上的Timer队列中。同时JS引擎中还有一个定时触发器，当setTimeout所设的延迟时间到了后，它会去唤醒Timer队列中相应的function。但是定时触发是有前提的，就是**JS引擎处于空闲的时候才会去触发**。
 
-    setTimeout(function(){
-        alert('hello');
-    }, 1000);
+```js
+setTimeout(function(){
+    alert('hello');
+}, 1000);
 
-    for(var i=0; i<100000; i++){
-        // 开销大的计算
-    }
+for(var i=0; i<100000; i++){
+    // 开销大的计算
+}
+```
 
 举个例子，先往Timer中放入了函数，指定它1秒后执行。但是随后JS引擎要执行一段超大循环的复杂计算，这个过程需要10秒才能全部计算完。如此的话，那个定时触发的函数也需要在10秒后（等JS引擎空闲下来后）才会被触发。
 
 
 而setInterval设置间隔触发的时间，会在JS引擎中反复放该函数块，相当于“时间片”，JS引擎会间隔地去触发这些函数片。但是呢，这个间隔时间也是不一定的，它们被触发的前提都是需要JS引擎在空闲的时候。
 
-    setInterval(function(){
-        for(var i=0; i<100000; i++){
-            // 开销大的计算
-        }
-        alert('hello');
-    }, 1000);
+```js
+setInterval(function(){
+    for(var i=0; i<100000; i++){
+        // 开销大的计算
+    }
+    alert('hello');
+}, 1000);
+```
 
 这个例子跟上面类似，setInterval中设置的函数是一个时间开销很大的过程，如果设置完后JS引擎就空闲了，那么第一次触发的时候会在1秒后。但是第一次触发执行时，需要花费10秒才能执行完，那么该函数执行完后紧接着会继续被触发（因为已经超过了它当初被设置的1秒的间隔）。这样相当于该函数被连续执行并且彼此之间没有时间间隔。
 
@@ -105,24 +111,26 @@ setTimeout(0)并不是立即执行
 --------------
 有了上面的理论基础，这道题就迎刃而解了。
 
-    var a = 0;
+```js
+var a = 0;
 
-    function one(){
-        for(var i=0; i<10; i++){
-            setTimeout(function(){
-                a += i;
-            }, 0);
-        }
-    }
-
-    function two(){
+function one(){
+    for(var i=0; i<10; i++){
         setTimeout(function(){
-            alert(a);
+            a += i;
         }, 0);
     }
+}
 
-    one();
-    two();
+function two(){
+    setTimeout(function(){
+        alert(a);
+    }, 0);
+}
+
+one();
+two();
+```
 
 首先`one()`被执行时，它里面有个for循环10次，往Timer中添加了10个`function(){ a += i; }`这样的函数。然后`two()`被执行时，它往Timer中添加了`function(){ alert(a); }`这个函数。现在Timer队列中有11个函数。
 

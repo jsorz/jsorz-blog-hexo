@@ -17,37 +17,41 @@ tags: [javascript, 面试]
 
 问题1：
 
-    var obj = {
-        run: function(){
-            function test(){ alert(this); }
-            test();
-        }
-    };
+```js
+var obj = {
+    run: function(){
+        function test(){ alert(this); }
+        test();
+    }
+};
 
-    obj.run();
+obj.run();
+```
 
 `obj.run()`进入函数主体时，因为调用者是`obj`，因此`run()`内部`this`是指向`obj`的。但是`run()`内部又定义了一个function，直接执行了`test()`，因此`test()`内部的`this`未显式指定，`this`默认指向就是`window`。
 
 
 问题2：
 
-    var name = 'window';
-    var obj = {
-        name: 'obj',
+```js
+var name = 'window';
+var obj = {
+    name: 'obj',
 
-        child: {
-            // name: 'child',
+    child: {
+        // name: 'child',
 
-            getName: function () {
-                return this.name;
-            }
+        getName: function () {
+            return this.name;
         }
+    }
 
-    };
+};
 
-    var getName = obj.child.getName;
-    alert(getName());
-    alert(obj.child.getName());
+var getName = obj.child.getName;
+alert(getName());
+alert(obj.child.getName());
+```
 
 因为直接把`obj.child.getName`赋给了`getName`变量，因此`getName`就是个function，直接调用`getName()`时其内部`this`指向的是默认值`window`，因此alert结果是`window`。
 
@@ -56,19 +60,21 @@ tags: [javascript, 面试]
 
 问题3：
 
-    function a(x, y){
-        y = function(){
-            x = 2;
-        };
+```js
+function a(x, y){
+    y = function(){
+        x = 2;
+    };
 
-        return function(){
-            var x = 3;
-            y();
-            console.log(x);
-        }.apply(this, arguments);
-    }
+    return function(){
+        var x = 3;
+        y();
+        console.log(x);
+    }.apply(this, arguments);
+}
 
-    a();
+a();
+```
 
 这题是在[ruanyf](http://weibo.com/ruanyf)老师的微博上看到的，意思是很难的一道面试题，在console里试了下才想通了结果。
 
@@ -86,27 +92,33 @@ tags: [javascript, 面试]
 
 问题1：
 
-    var A = function(){
-        this.name = 'A';
-    };
-    A.prototype.say = function(){
-        alert(this.name);
-    };
+```js
+var A = function(){
+    this.name = 'A';
+};
+A.prototype.say = function(){
+    alert(this.name);
+};
 
-    var B = function(){ };
+var B = function(){ };
+```
 
 Q1：写段代码让B继承A
 
-    var F = function(){};
-    F.prototype = A.prototype;
-    B.prototype = new F();
+```js
+var F = function(){};
+F.prototype = A.prototype;
+B.prototype = new F();
+```
 
 我使用了[圣杯模式](/blog/2014/03/js-pattern-part5-code-reuse-pattern.html#阶段6-圣杯)的思想来继承，通过一个中间的空函数，使得B的原型对象实例最小，不会包含A的实例变量`name`。
 
 Q2：下面输出结果是多少？
 
-    var objB = new B();
-    objB.say();
+```js
+var objB = new B();
+objB.say();
+```
 
 如果按照我上面那种继承方法的话，由于B的原型对象其实`F`的实例（F的原型指向A的原型），`F`的实例中并没有`name`属性，所以`objB.say()`访问不到`this.name`，结果就是`undefined`啦。
 
@@ -115,12 +127,14 @@ Q2：下面输出结果是多少？
 
 问题2：
 
-    Function.prototype.f = function(){};
-    Object.prototype.o = function(){};
+```js
+Function.prototype.f = function(){};
+Object.prototype.o = function(){};
 
-    function Factory(){}
+function Factory(){}
 
-    var car = new Factory();
+var car = new Factory();
+```
 
 Q：能调用`car.f()`和`car.o()`吗？
 

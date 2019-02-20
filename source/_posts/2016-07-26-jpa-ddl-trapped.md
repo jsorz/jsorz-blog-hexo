@@ -18,9 +18,11 @@ Play中的JPA
 ------------
 在[Play Framework 1.2.7](https://www.playframework.com/documentation/1.2.x/home)中，其JPA底层采用的是 Hibernate 3.6 的实现。在Play的`application.conf`文件中可以看到有如下一段配置说明：
 
-    # Specify the ddl generation pattern to use. Set to none to disable it 
-    # (default to update in DEV mode, and none in PROD mode):
-    # jpa.default.ddl=update
+```
+# Specify the ddl generation pattern to use. Set to none to disable it 
+# (default to update in DEV mode, and none in PROD mode):
+# jpa.default.ddl=update
+```
 
 在调试模式下，`jpa.default.ddl`的默认值就是`update`。。。那到底什么是`ddl`呢，坑又是啥？
 
@@ -47,9 +49,11 @@ DDL的全称为：Data Definition Language，大概是学数据库课或集成�
 
 所以回过头再看Play中的那段配置
 
-    # Specify the ddl generation pattern to use. Set to none to disable it 
-    # (default to update in DEV mode, and none in PROD mode):
-    # jpa.default.ddl=update
+```
+# Specify the ddl generation pattern to use. Set to none to disable it 
+# (default to update in DEV mode, and none in PROD mode):
+# jpa.default.ddl=update
+```
 
 所以在开发状态下，ddl可以默认开启，以省去我们手动修改数据库字段的活儿。。而当生产状态下，最好不要开启该 ddl generation 功能！
 

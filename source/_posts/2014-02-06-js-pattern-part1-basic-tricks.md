@@ -30,13 +30,15 @@ JavaScript没有继承，通常使用原型来实现继承。
 
 example.
 
-	var func = function(){};
-	console.log(func.constructor);  //output: function Function() { [native code] }
-	console.log(func.prototype);  //output: Object {}
-	console.log(func.prototype.constructor);  //output: function (){}
+```js
+var func = function(){};
+console.log(func.constructor);  //output: function Function() { [native code] }
+console.log(func.prototype);  //output: Object {}
+console.log(func.prototype.constructor);  //output: function (){}
 
-	var obj = {};
-	console.log(obj.constructor);  //output: function Object() { [native code] }
+var obj = {};
+console.log(obj.constructor);  //output: function Object() { [native code] }
+```
 
 
 全局变量的问题
@@ -51,14 +53,18 @@ Javascript总是在不知不觉中就出人意料地创建了全局变量，其�
 
 example.
 	
-	function foo(){
-		var a = b = 0;
-		//...
-	}
+```js
+function foo(){
+	var a = b = 0;
+	//...
+}
+```
 
 在这代码片段中，`a`是局部变量，`b`是全局变量，这也许并不是你想要的。这源于从右至左的操作符优先级。首先，优先级较高的是表达式`b=0`，此时`b`未经声明。表达式的返回值为`0`，它被赋给`var`声明的局部变量`a`，如以下代码表示：
 
-	var a = (b = 0);
+```js
+var a = (b = 0);
+```
 
 
 变量释放时的副作用
@@ -75,24 +81,28 @@ Javascript允许在函数的任意地方声明多个变量，无论在哪里声�
 
 example.
 
-	myname = 'global';
-	function func(){
-		alert(myname);  //output: undefined
-		var myname = 'local';
-	   	alert(myname);  //output: local
-	}
-	func();
+```js
+myname = 'global';
+function func(){
+	alert(myname);  //output: undefined
+	var myname = 'local';
+   	alert(myname);  //output: local
+}
+func();
+```
 
 等同于
 
-	myname = 'global';
-	function func(){
-		var myname;  //等同于 var myname = undefined;
-		alert(myname);  //output: undefined
-		myname = 'local';
-		alert(myname);  //output: local
-	}
-	func();
+```js
+myname = 'global';
+function func(){
+	var myname;  //等同于 var myname = undefined;
+	alert(myname);  //output: undefined
+	myname = 'local';
+	alert(myname);  //output: local
+}
+func();
+```
 
 注：仅仅是变量声明提升了，赋值仍在原来的位置。
 
@@ -105,19 +115,23 @@ for循环性能提升建议：
 
 example.
 
-	for(var i=elements.length-1; i>=0; i--){...}
-	//或
-	for(var i=elements.length; i--; ){...}
+```js
+for(var i=elements.length-1; i>=0; i--){...}
+//或
+for(var i=elements.length; i--; ){...}
+```
 
 for-in循环用来遍历非数组对象，也被称为枚举。当遍历对象属性时，使用`hasOwnProperty()`来过滤原型链的属性。
 
 example.
 
-	for(var i in obj){
-		if(obj.hasOwnProperty(i)){...}
-		//或
-		if(Object.prototype.hasOwnProperty(obj, i)){...}
-	}
+```js
+for(var i in obj){
+	if(obj.hasOwnProperty(i)){...}
+	//或
+	if(Object.prototype.hasOwnProperty(obj, i)){...}
+}
+```
 
 
 避免使用eval()
@@ -128,47 +142,53 @@ example.
 
 example.
 
-	//反模式 
-	setTimeout('myFunc()', 1000);
-	setTimeout('myFunc(1, 2, 3)', 1000);
+```js
+//反模式 
+setTimeout('myFunc()', 1000);
+setTimeout('myFunc(1, 2, 3)', 1000);
 
-	//推荐的模式 
-	setTimeout(myFunc, 1000);
-	setTimeout(function(){
-		myFunc(1, 2, 3);
-	}, 1000);
+//推荐的模式 
+setTimeout(myFunc, 1000);
+setTimeout(function(){
+	myFunc(1, 2, 3);
+}, 1000);
+```
 
 
 如果一定要使用`eval()`，那么可以考虑使用`new Function()`来替代`eval()`。这样做的一个潜在好处是由于在`new Function()`中的代码将在局部函数空间中运行，因此代码中任何采用`var`定义的变量不会自动成为全局变量。另一个避免自动成为全局变量的方法是将`eval()`调用封装到一个即时函数中。
 
 example.
 
-	var jsstring = 'var one = 1; console.log(one);';
-	eval(jsstring);  //output: 1
+```js
+var jsstring = 'var one = 1; console.log(one);';
+eval(jsstring);  //output: 1
 
-	jsstring = 'var two = 2; console.log(two);';
-	(function(){
-		eval(jsstring);
-	}());  //output: 2
+jsstring = 'var two = 2; console.log(two);';
+(function(){
+	eval(jsstring);
+}());  //output: 2
 
-	console.log(typeof one);  //output: number
-	console.log(typeof two);  //output: undefined
+console.log(typeof one);  //output: number
+console.log(typeof two);  //output: undefined
+```
 
 另一个`new Function()`和`eval()`的区别在于`eval()`会影响到作用域链，而`Function()`更多地类似于一个沙盒。无论在哪里执行`Function`，它都仅仅能看到全局作用域，因此对局部变量的影响较小。
 在接下来的例子中，`eval()`可以访问和修改它外部作用域的变量，然而`Function`不行（请注意使用`Function`和使用`new Function`是一样的）。
 
 example.
 
-	(function(){
-		var local = 1;
-		eval('local = 3; console.log(local);');  //output: 3
-		console.log(local);  //output: 3
-	}());
-	
-	(function(){
-		var local = 1;
-		Function('console.log(typeof local);')();  //output: undefined
-	}());
+```js
+(function(){
+	var local = 1;
+	eval('local = 3; console.log(local);');  //output: 3
+	console.log(local);  //output: 3
+}());
+
+(function(){
+	var local = 1;
+	Function('console.log(typeof local);')();  //output: undefined
+}());
+```
 
 
 参考

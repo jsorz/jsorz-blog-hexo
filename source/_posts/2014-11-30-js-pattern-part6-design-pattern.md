@@ -12,108 +12,120 @@ tags: [javascript, 读书笔记]
 
 在js中，对象之间永远不会完全相等，除非它们是同一个对象，因此即使创建一个具有完全相同成员的同类对象，它也不会与第一个对象完全相同。
 
-    var obj1 = {};
-    var obj2 = {};
-    obj1 == obj2;  //output: false
+```js
+var obj1 = {};
+var obj2 = {};
+obj1 == obj2;  //output: false
+```
 
 因此，可以认为每次在使用对象字面量创建对象的时候，实际上就是在创建一个单体。注意有时人们在js中所说的“单体”，就是指前面提到的“[模块模式](/blog/2014/03/js-pattern-part4-object-creation-pattern.html#模块模式)”。
 
 **1.通过静态属性实现单体**
 
-    function Universe(){
-        if(typeof Universe.instance === 'object'){
-            return Universe.instance;
-        }
-
-        // 正常进行
-        this.start_time = 0;
-
-        // 缓存
-        Universe.instance = this;
-
-        // 隐式返回
-        // return this;
+```js
+function Universe(){
+    if(typeof Universe.instance === 'object'){
+        return Universe.instance;
     }
+
+    // 正常进行
+    this.start_time = 0;
+
+    // 缓存
+    Universe.instance = this;
+
+    // 隐式返回
+    // return this;
+}
+```
 
 这种方法非常直接，但是缺点在于其`instance`属性是公开的，存在被恶意修改的隐患。
 
 **2.通过闭包实现单体**
 
-    function Universe(){
-        // 缓存实例
-        var instance = this;
+```js
+function Universe(){
+    // 缓存实例
+    var instance = this;
 
-        // 正常进行
-        this.start_time = 0;
+    // 正常进行
+    this.start_time = 0;
 
-        // 重写该构造函数
-        Universe = function(){
-            return instance;
-        };
-    }
+    // 重写该构造函数
+    Universe = function(){
+        return instance;
+    };
+}
+```
 
 这种实现实际上是来自于前面提到的“[自定义函数](/blog/2014/02/js-pattern-part3-function.html#性能模式-自定义函数)”模式的另一个例子。这种方法的缺点在于，重写构造函数会丢失所有在初始化定义和重定义时刻之间添加到它里面的属性。
 
-    Universe.prototype.nothing = true;
-    var uni = new Universe();
-    Universe.prototype.everything = true;
-    var uni2 = new Universe();
+```js
+Universe.prototype.nothing = true;
+var uni = new Universe();
+Universe.prototype.everything = true;
+var uni2 = new Universe();
 
-    uni.nothing;  //output: true
-    uni2.nothing;  //output: true
-    uni.everything;  //output: undefined
-    uni2.everything;  //ouput: undefined
+uni.nothing;  //output: true
+uni2.nothing;  //output: true
+uni.everything;  //output: undefined
+uni2.everything;  //ouput: undefined
 
-    // 结果看上去是正确的
-    uni.constructor.name;  //ouput: "Universe"
-    // 但这是奇怪的
-    uni.constructor === Universe;  //output: flase
+// 结果看上去是正确的
+uni.constructor.name;  //ouput: "Universe"
+// 但这是奇怪的
+uni.constructor === Universe;  //output: flase
+```
 
 之所以`uni.constructor`不在与`Universe()`构造函数相同，是因为`uni.constructor`仍然指向了原始的构造函数，而不是重新定义的那个构造函数。
 
 如果需要使原型和构造函数指针安装预期的那样运行，改进如下
 
-    function Universe(){
-        // 缓存实例
-        var instance;
+```js
+function Universe(){
+    // 缓存实例
+    var instance;
 
-        // 重写构造函数
-        Universe = function Universe(){
-            return instance;
-        };
-
-        // 保留原型属性
-        Universe.prototype = this;
-
-        // 实例
-        instance = new Universe();
-
-        // 重置构造函数指针
-        instance.constructor = Universe;
-
-        // 所有功能
-        instance.start_time = 0;
-
+    // 重写构造函数
+    Universe = function Universe(){
         return instance;
-    }
+    };
+
+    // 保留原型属性
+    Universe.prototype = this;
+
+    // 实例
+    instance = new Universe();
+
+    // 重置构造函数指针
+    instance.constructor = Universe;
+
+    // 所有功能
+    instance.start_time = 0;
+
+    return instance;
+}
+```
 
 另一种解决方案是将构造函数和实例包装在即时函数中，如下
 
-    var Universe;
-    (function(){
-        var instance;
-       
-        Universe = function Universe(){
-            if(instance){
-                return instance;
-            }
+```js
+var Universe;
+(function(){
+    var instance;
+   
+    Universe = function Universe(){
+        if(instance){
+            return instance;
+        }
 
-            instance = this;
+        instance = this;
 
-            // 所有功能
-            this.start_time = 0;
-        };
-    })();
+        // 所有功能
+        this.start_time = 0;
+    };
+})();
+```
 
 
 工厂模式
@@ -124,56 +136,60 @@ tags: [javascript, 读书笔记]
 
 2.当编译时不知道具体类型（类）的情况下，为工厂客户提供一种创建对象的接口
 
-    // 父构造函数
-    function CarMaker(){}
+```js
+// 父构造函数
+function CarMaker(){}
 
-    CarMaker.prototype.drive = function(){
-        return "Vroom, I hvae " + this.doors + ' doors';
-    };
+CarMaker.prototype.drive = function(){
+    return "Vroom, I hvae " + this.doors + ' doors';
+};
 
-    // 静态工厂方法
-    CarMaker.factory = function(type){
-        var newcar;
+// 静态工厂方法
+CarMaker.factory = function(type){
+    var newcar;
 
-        // 如果构造函数不存在，则发生错误
-        if(typeof CarMaker[type] !== 'function'){
-            throw {
-                name: 'Error',
-                message: type + ' doesn\'t exist'
-            };
-        }
-
-        // 在这里，构造函数是已知存在的
-        // 我们使得原型继承父类，但仅继承一次
-        if(typeof CarMaker[type].prototype.drive !== 'function'){
-            CarMaker[type].prototype = new CarMaker();
-        }
-
-        // 创建一个新的实例
-        newcar = new CarMaker[type]();
-        // 可选择性的调用一些方法后返回……
-        return newcar;
+    // 如果构造函数不存在，则发生错误
+    if(typeof CarMaker[type] !== 'function'){
+        throw {
+            name: 'Error',
+            message: type + ' doesn\'t exist'
+        };
     }
 
-    // 定义特定的汽车制造商
-    CarMaker.Compact = function(){
-        this.doors = 4;
-    };
-    CarMaker.Convertible = function(){
-        this.doors = 2;
-    };
-    CarMaker.SUV = function(){
-        this.doors = 24;
-    };
+    // 在这里，构造函数是已知存在的
+    // 我们使得原型继承父类，但仅继承一次
+    if(typeof CarMaker[type].prototype.drive !== 'function'){
+        CarMaker[type].prototype = new CarMaker();
+    }
+
+    // 创建一个新的实例
+    newcar = new CarMaker[type]();
+    // 可选择性的调用一些方法后返回……
+    return newcar;
+}
+
+// 定义特定的汽车制造商
+CarMaker.Compact = function(){
+    this.doors = 4;
+};
+CarMaker.Convertible = function(){
+    this.doors = 2;
+};
+CarMaker.SUV = function(){
+    this.doors = 24;
+};
+```
 
 `factory`方法通过字符串指定类型来创建对象。继承部分仅是可以放进工厂方法的一个公用重复代码片段的范例，而不是对每种类型的构造函数的重复。
 
 值得注意的是，js内置的`Object()`就是一个自然工厂，它根据输入类型而创建不同的对象。
 
-    var s = new Object('1');
-    var n = new Object(1);
-    s.constructor === String;  //output: true
-    n.constructor === Number;  //output: true
+```js
+var s = new Object('1');
+var n = new Object(1);
+s.constructor === String;  //output: true
+n.constructor === Number;  //output: true
+```
 
 
 装饰者模式
@@ -182,93 +198,97 @@ tags: [javascript, 读书笔记]
 
 **1.使用继承实现**
 
-    function Sale(price){
-        this.price = price || 100;
+```js
+function Sale(price){
+    this.price = price || 100;
+}
+Sale.prototype.getPrice = function(){
+    return this.price;
+};
+
+// 以字符串的方式找到对象块拼接
+Sale.prototype.decorate = function(decorator){
+    var F = function(){};
+    F.prototype = this;
+    var newObj = new F();
+    newObj.super = F.prototype;
+
+    var overrides = this.constructor.decorators[decorator];
+    for(var i in overrides){
+        if(overrides.hasOwnProperty(i)){
+            newObj[i] = overrides[i];
+        }
     }
-    Sale.prototype.getPrice = function(){
-        return this.price;
-    };
+    return newObj;
+}
 
-    // 以字符串的方式找到对象块拼接
-    Sale.prototype.decorate = function(decorator){
-        var F = function(){};
-        F.prototype = this;
-        var newObj = new F();
-        newObj.super = F.prototype;
+// 装饰者对象都将以构造函数的属性这种方式来实现
+Sale.decorators = {};
 
-        var overrides = this.constructor.decorators[decorator];
-        for(var i in overrides){
-            if(overrides.hasOwnProperty(i)){
-                newObj[i] = overrides[i];
-            }
-        }
-        return newObj;
+Sale.decorators.fedtax = {
+    getPrice: function(){
+        var price = this.super.getPrice();
+        price += price * 5 / 100;
+        return price;
     }
+};
 
-    // 装饰者对象都将以构造函数的属性这种方式来实现
-    Sale.decorators = {};
+Sale.decorators.cdn = {
+    getPrice: function(){
+        return 'CDN$ ' + this.super.getPrice().toFixed(2);
+    }
+};
 
-    Sale.decorators.fedtax = {
-        getPrice: function(){
-            var price = this.super.getPrice();
-            price += price * 5 / 100;
-            return price;
-        }
-    };
-
-    Sale.decorators.cdn = {
-        getPrice: function(){
-            return 'CDN$ ' + this.super.getPrice().toFixed(2);
-        }
-    };
-
-    用法
-    var sale= new Sale(100);
-    sale = sale.decorate('fedtax');
-    sale = sale.decorate('cdn');
-    sale.getPrice();  //output: CDN$ 105.00
+// 用法
+var sale= new Sale(100);
+sale = sale.decorate('fedtax');
+sale = sale.decorate('cdn');
+sale.getPrice();  //output: CDN$ 105.00
+```
 
 **2.使用列表实现**
 
 利用js语言的动态性质，根本不需要使用继承。此外，并不是使每个装饰方法调用链中前面的方法，我们可以简单地将前面方法的结果作为参数传递到下一个方法。
 
-    function Sale(price){
-        this.price = (price > 0) || 100;
-        this.decorators_list = [];
+```js
+function Sale(price){
+    this.price = (price > 0) || 100;
+    this.decorators_list = [];
+}
+
+Sale.decorators = {};
+Sale.decorators.fedtax = {
+    getPrice: function(price){
+        return price + price * 5 / 100;
     }
+};
+Sale.decorators.cdn = {
+    getPrice: function(price){
+        return 'CDN$ ' + price.toFixed(2);
+    }
+};
 
-    Sale.decorators = {};
-    Sale.decorators.fedtax = {
-        getPrice: function(price){
-            return price + price * 5 / 100;
-        }
-    };
-    Sale.decorators.cdn = {
-        getPrice: function(price){
-            return 'CDN$ ' + price.toFixed(2);
-        }
-    };
+Sale.prototype.decorate = function(decorator){
+    this.decorators_list.push(decorator);
+};
 
-    Sale.prototype.decorate = function(decorator){
-        this.decorators_list.push(decorator);
-    };
+Sale.prototype.getPrice = function(){
+    var price = this.price;
+    var name;
 
-    Sale.prototype.getPrice = function(){
-        var price = this.price;
-        var name;
+    for(var i=0, len=this.decorators_list.length; i<len; i++){
+        name = this.decorators_list[i];
+        price = Sale.decorators[name].getPrice(price);
+    }
+    return price;
+};
 
-        for(var i=0, len=this.decorators_list.length; i<len; i++){
-            name = this.decorators_list[i];
-            price = Sale.decorators[name].getPrice(price);
-        }
-        return price;
-    };
-
-    用法
-    var sale = new Sale(100);
-    sale.decorate('fedtax');
-    sale.decorate('cdn');
-    sale.getPrice();  //output: CDN$ 105.00
+// 用法
+var sale = new Sale(100);
+sale.decorate('fedtax');
+sale.decorate('cdn');
+sale.getPrice();  //output: CDN$ 105.00
+```
 
 在使用继承的实现方法中，`decorate()`具有一定的复杂性，而`getPrice()`非常简单。而在这里的实现中正好相反，`decorate()`进用于追加列表，而`getPrice()`却完成所有工作。这种实现方式更为简单，并且还可以很容易的支持反装饰或撤销装饰。
 
@@ -276,110 +296,114 @@ tags: [javascript, 读书笔记]
 
 【我的实现】
 
-    Sale.prototype.getDecoratedValue = function(methodName){
-        var value, name;
-        var params = Array.prototype.slice.call(arguments, 1);
+```js
+Sale.prototype.getDecoratedValue = function(methodName){
+    var value, name;
+    var params = Array.prototype.slice.call(arguments, 1);
 
-        for(var i=0, len=this.decorators_list.length; i<len; i++){
-            name = this.decorators_list[i];
-            value = Sale.decorators[name][methodName].apply(this, params);
-            params = [value];
-        }
-        return value;
-    };
+    for(var i=0, len=this.decorators_list.length; i<len; i++){
+        name = this.decorators_list[i];
+        value = Sale.decorators[name][methodName].apply(this, params);
+        params = [value];
+    }
+    return value;
+};
 
-    Sale.prototype.getPrice = function(){
-        return this.getDecoratedValue('getPrice', this.price);
-    };
+Sale.prototype.getPrice = function(){
+    return this.getDecoratedValue('getPrice', this.price);
+};
+```
 
 
 策略模式
 ---------
 策略模式支持在运行时选择算法。代码的客户端可以使用同一个接口来工作，但是它却根据客户正在试图执行任务的上下文，从多个算法中选择用于处理特定任务的算法。使用策略模式的一个例子是解决表单验证的问题。
 
-    var validator = {
-        // 所有可用的检查
-        types: {},
+```js
+var validator = {
+    // 所有可用的检查
+    types: {},
 
-        // 在当前验证会话中的错误消息
-        messages: [],
+    // 在当前验证会话中的错误消息
+    messages: [],
 
-        // 当前验证配置
-        // key: 名称  value: 验证类型
-        config: {},
+    // 当前验证配置
+    // key: 名称  value: 验证类型
+    config: {},
 
-        // 接口方法
-        // data为key-value对
-        validate: function(data){
-            var msg, type, checker, result_ok;
+    // 接口方法
+    // data为key-value对
+    validate: function(data){
+        var msg, type, checker, result_ok;
 
-            // 重置所有消息
-            this.messages = [];
+        // 重置所有消息
+        this.messages = [];
 
-            for(var i in data){
-                if(data.hasOwnProperty(i)){
-                    type = this.config[i];
-                    checker = this.types[type];
+        for(var i in data){
+            if(data.hasOwnProperty(i)){
+                type = this.config[i];
+                checker = this.types[type];
 
-                    if(!type){
-                        continue;  // 不需要验证
-                    }
-                    if(!checker){
-                        throw {
-                            name: 'ValidationError',
-                            message: 'No handler to validate type ' + type
-                        };
-                    }
+                if(!type){
+                    continue;  // 不需要验证
+                }
+                if(!checker){
+                    throw {
+                        name: 'ValidationError',
+                        message: 'No handler to validate type ' + type
+                    };
+                }
 
-                    result_ok = checker.validate(data[i]);
-                    if(!result_ok){
-                        msg = 'Invalid value for *' + i + '*, ' + checker.instructions;
-                        this.messages.push(msg);
-                    }
+                result_ok = checker.validate(data[i]);
+                if(!result_ok){
+                    msg = 'Invalid value for *' + i + '*, ' + checker.instructions;
+                    this.messages.push(msg);
                 }
             }
-            return this.hasErrors();
-        },
-
-        // 帮助方法
-        hasErrors: function(){
-            return this.messages.length > 0;
         }
-    };
+        return this.hasErrors();
+    },
 
-    // 非空值的检查
-    validator.types.isNonEmpty = {
-        validate: function(value){
-            return value !== '';
-        },
-        instructions: 'the value cannot be empty'
-    };
-
-    // 检查是否是一个数字
-    validator.types.isNumber = {
-        validate: function(value){
-            return !isNaN(value);
-        },
-        instructions: 'the value can only be a valid number'
-    };
-
-    // *****
-    // 用法
-    // *****
-    var data = {
-        name: 'fucky',
-        age: 'unknown'
-    };
-
-    validator.config = {
-        name: 'isNonEmpty',
-        age: 'isNumber'
-    };
-
-    validator.validate(data);
-    if(validator.hasErrors()){
-        console.log(validator.messages.join('\n'));
+    // 帮助方法
+    hasErrors: function(){
+        return this.messages.length > 0;
     }
+};
+
+// 非空值的检查
+validator.types.isNonEmpty = {
+    validate: function(value){
+        return value !== '';
+    },
+    instructions: 'the value cannot be empty'
+};
+
+// 检查是否是一个数字
+validator.types.isNumber = {
+    validate: function(value){
+        return !isNaN(value);
+    },
+    instructions: 'the value can only be a valid number'
+};
+
+// *****
+// 用法
+// *****
+var data = {
+    name: 'fucky',
+    age: 'unknown'
+};
+
+validator.config = {
+    name: 'isNonEmpty',
+    age: 'isNumber'
+};
+
+validator.validate(data);
+if(validator.hasErrors()){
+    console.log(validator.messages.join('\n'));
+}
+```
 
 如上所示，`validator`对象是通用的，增强`validator`对象的方法是添加更多的类型检查。以后针对每个新的用例，所需做的就是配置该验证器并运行`validate()`方法。
 
@@ -390,24 +414,26 @@ tags: [javascript, 读书笔记]
 
 例如，当处理浏览器事件时，`stopPropagation()`和`preventDefault()`两个方法经常被一起调用。外观模式非常适合于浏览器脚本处理，据此可讲浏览器之间的差异隐藏在外观之后。
 
-    var myevent = {
-        stop: function(e){
-            // IE
-            if(typeof e.returnValue === 'boolean'){
-                e.returnValue = false;
-            }
-            if(typeof e.cancelBubble === 'boolean'){
-                e.cancelBubble = true;
-            }
-            // 其他
-            if(typeof e.preventDefault === 'function'){
-                e.preventDefault();
-            }
-            if(typeof e.stopPropagation === 'function'){
-                e.preventDefault();
-            }
+```js
+var myevent = {
+    stop: function(e){
+        // IE
+        if(typeof e.returnValue === 'boolean'){
+            e.returnValue = false;
         }
-    };
+        if(typeof e.cancelBubble === 'boolean'){
+            e.cancelBubble = true;
+        }
+        // 其他
+        if(typeof e.preventDefault === 'function'){
+            e.preventDefault();
+        }
+        if(typeof e.stopPropagation === 'function'){
+            e.preventDefault();
+        }
+    }
+};
+```
 
 
 代理模式
@@ -420,51 +446,53 @@ tags: [javascript, 读书笔记]
 
 另一个例子是将访问聚集为组，比如尽可能合并更多的http请求就很重要，节省网络开销。这一点有点像数据库里的 [batch insert](http://viralpatel.net/blogs/batch-insert-in-java-jdbc/)。
 
-    var proxy = {
-        ids: [],
-        delay: 50,
-        timeout: null,
-        callback: null,
-        context: null,
+```js
+var proxy = {
+    ids: [],
+    delay: 50,
+    timeout: null,
+    callback: null,
+    context: null,
 
-        makeRequest: function(id, callback, context){
-            // 加入到队列中
-            this.ids.push(id);
+    makeRequest: function(id, callback, context){
+        // 加入到队列中
+        this.ids.push(id);
 
-            this.callback = callback;
-            this.context = context;
+        this.callback = callback;
+        this.context = context;
 
-            // 设置超时时间
-            if(!this.timeout){
-                this.timeout = setTimeout(function(){
-                    proxy.flush();
-                }, this.delay);
-            }
-        },
-
-        flush: function(){
-            // http是处理请求的本体对象，仅有这一个方法
-            http.makeRequest(this.ids, 'proxy.handler');
-
-            // 清除超时设置和队列
-            this.timeout = null;
-            this.ids = [];
-        },
-
-        // JSONP的callback
-        handler: function(data){
-            // 单个结果
-            if(parseInt(data.query.count, 10) === 1){
-                proxy.callback.call(proxy.context, data.query.results.Video);
-                return;
-            }
-
-            // 多个结果
-            for(var i=0, len=data.query.results.Video.length; i<len; i++){
-                proxy.callback.call(proxy.context, data.query.results.Video[i]);
-            }
+        // 设置超时时间
+        if(!this.timeout){
+            this.timeout = setTimeout(function(){
+                proxy.flush();
+            }, this.delay);
         }
-    };
+    },
+
+    flush: function(){
+        // http是处理请求的本体对象，仅有这一个方法
+        http.makeRequest(this.ids, 'proxy.handler');
+
+        // 清除超时设置和队列
+        this.timeout = null;
+        this.ids = [];
+    },
+
+    // JSONP的callback
+    handler: function(data){
+        // 单个结果
+        if(parseInt(data.query.count, 10) === 1){
+            proxy.callback.call(proxy.context, data.query.results.Video);
+            return;
+        }
+
+        // 多个结果
+        for(var i=0, len=data.query.results.Video.length; i<len; i++){
+            proxy.callback.call(proxy.context, data.query.results.Video[i]);
+        }
+    }
+};
+```
 
 本例中，代理可以通过将以前的请求结果缓存到新的`cache`属性中，从而更进一步的保护对本体对象http的访问，节省网络往返消息。
 
@@ -475,82 +503,84 @@ tags: [javascript, 读书笔记]
 
 示例：按键游戏
 
-    // 玩家
-    function Player(name) {
-        this.points = 0;
-        this.name = name;
+```js
+// 玩家
+function Player(name) {
+    this.points = 0;
+    this.name = name;
+}
+Player.prototype.play = function () {
+    this.points += 1;
+    mediator.played();
+};
+
+// 计分板
+var scoreboard = {
+    // 待更新的HTML元素
+    element: document.getElementById('results'),
+   
+    // 更新得分显示
+    update: function (score) {
+        var i, msg = '';
+        for (i in score) {
+            if (score.hasOwnProperty(i)) {
+                msg += '<p><strong>' + i + '<\/strong>: ';
+                msg += score[i];
+                msg += '<\/p>';
+            }
+        }
+        this.element.innerHTML = msg;
     }
-    Player.prototype.play = function () {
-        this.points += 1;
-        mediator.played();
-    };
+};
 
-    // 计分板
-    var scoreboard = {
-        // 待更新的HTML元素
-        element: document.getElementById('results'),
-       
-        // 更新得分显示
-        update: function (score) {
-            var i, msg = '';
-            for (i in score) {
-                if (score.hasOwnProperty(i)) {
-                    msg += '<p><strong>' + i + '<\/strong>: ';
-                    msg += score[i];
-                    msg += '<\/p>';
-                }
-            }
-            this.element.innerHTML = msg;
+// 中介者对象
+var mediator = {
+    // 所有玩家（player对象）
+    players: {},
+   
+    // 初始化游戏
+    setup: function () {
+        var players = this.players;
+        players.home = new Player('Home');
+        players.guest = new Player('Guest');
+    },
+   
+    // 如果有人玩，则更新得分值
+    played: function () {
+        var players = this.players,
+            score = {
+                Home:  players.home.points,
+                Guest: players.guest.points
+            };
+           
+        scoreboard.update(score);
+    },
+   
+    // 处理用户交互
+    keypress: function (e) {
+        e = e || window.event; // IE
+        if (e.which === 49) { // key "1"
+            mediator.players.home.play();
+            return;
         }
-    };
-
-    // 中介者对象
-    var mediator = {
-        // 所有玩家（player对象）
-        players: {},
-       
-        // 初始化游戏
-        setup: function () {
-            var players = this.players;
-            players.home = new Player('Home');
-            players.guest = new Player('Guest');
-        },
-       
-        // 如果有人玩，则更新得分值
-        played: function () {
-            var players = this.players,
-                score = {
-                    Home:  players.home.points,
-                    Guest: players.guest.points
-                };
-               
-            scoreboard.update(score);
-        },
-       
-        // 处理用户交互
-        keypress: function (e) {
-            e = e || window.event; // IE
-            if (e.which === 49) { // key "1"
-                mediator.players.home.play();
-                return;
-            }
-            if (e.which === 48) { // key "0"
-                mediator.players.guest.play();
-                return;
-            }
+        if (e.which === 48) { // key "0"
+            mediator.players.guest.play();
+            return;
         }
-    };
+    }
+};
 
 
-    // 运行游戏
-    mediator.setup();
-    window.onkeypress = mediator.keypress;
+// 运行游戏
+mediator.setup();
+window.onkeypress = mediator.keypress;
 
-    // 游戏在30秒内结束
-    setTimeout(function () {
-        window.onkeypress = null;
-        alert('Game over!');
-    }, 30000);
+// 游戏在30秒内结束
+setTimeout(function () {
+    window.onkeypress = null;
+    alert('Game over!');
+}, 30000);
+```
 
 
 观察者模式
@@ -561,168 +591,170 @@ tags: [javascript, 读书笔记]
 
 示例：按键游戏
 
-    // 发布者对象
-    var publisher = {
-        // 订阅者
-        // key为订阅的消息类型（默认为'any'）
-        // value为回调函数的列表
-        subscribers: {
-            any: []
-        },
+```js
+// 发布者对象
+var publisher = {
+    // 订阅者
+    // key为订阅的消息类型（默认为'any'）
+    // value为回调函数的列表
+    subscribers: {
+        any: []
+    },
 
-        // 即subscribe方法
-        // context支持回调方法使用this以引用自己的对象
-        on: function (type, fn, context) {
-            type = type || 'any';
-            fn = typeof fn === "function" ? fn : context[fn];
-           
-            if (typeof this.subscribers[type] === "undefined") {
-                this.subscribers[type] = [];
-            }
-            this.subscribers[type].push({fn: fn, context: context || this});
-        },
-
-        // 即unsubscribe方法
-        remove: function (type, fn, context) {
-            this.visitSubscribers('unsubscribe', type, fn, context);
-        },
-
-        // 即publish方法
-        // publication为传递给回调函数的参数
-        fire: function (type, publication) {
-            this.visitSubscribers('publish', type, publication);
-        },
-
-        // help遍历方法
-        visitSubscribers: function (action, type, arg, context) {
-            var pubtype = type || 'any',
-                subscribers = this.subscribers[pubtype],
-                i,
-                max = subscribers ? subscribers.length : 0;
-               
-            for (i = 0; i < max; i += 1) {
-                if (action === 'publish') {
-                    // 支持回调方法使用this指向自身对象
-                    // arg为传递给回调函数的参数，多参数请用对象包起来
-                    subscribers[i].fn.call(subscribers[i].context, arg);
-                } else {
-                    // 取消订阅
-                    if (subscribers[i].fn === arg && subscribers[i].context === context) {
-                        subscribers.splice(i, 1);
-                    }
-                }
-            }
-        }
-    };
-
-    // 使一个对象成为一个发布者
-    function makePublisher(o) {
-        var i;
-        for (i in publisher) {
-            if (publisher.hasOwnProperty(i) && typeof publisher[i] === "function") {
-                o[i] = publisher[i];
-            }
-        }
-        // 非函数成员不能复用指针，需创建新对象
-        o.subscribers = {any: []};
-    }
-
-
-    // 玩家
-    function Player(name, key) {
-        this.points = 0;
-        this.name = name;
-        this.key  = key;
-        // 触发事件
-        this.fire('newplayer', this);
-    }
-    Player.prototype.play = function () {
-        this.points += 1;
-        // 触发事件
-        this.fire('play', this);
-    };
-
-    // 游戏控制
-    var game = {
-        // 记录玩家
-        // key为按键，value为玩家对象
-        keys: {},
-
-        addPlayer: function (player) {
-            var key = player.key.toString().charCodeAt(0);
-            this.keys[key] = player;
-        },
-
-        // 处理用户交互
-        handleKeypress: function (e) {
-            e = e || window.event; // IE
-            if (game.keys[e.which]) {
-                game.keys[e.which].play();
-            }
-        },
+    // 即subscribe方法
+    // context支持回调方法使用this以引用自己的对象
+    on: function (type, fn, context) {
+        type = type || 'any';
+        fn = typeof fn === "function" ? fn : context[fn];
        
-        // 如果有人玩，则更新得分值
-        handlePlay: function (player) {
-            var i,
-                players = this.keys,
-                score = {};
+        if (typeof this.subscribers[type] === "undefined") {
+            this.subscribers[type] = [];
+        }
+        this.subscribers[type].push({fn: fn, context: context || this});
+    },
+
+    // 即unsubscribe方法
+    remove: function (type, fn, context) {
+        this.visitSubscribers('unsubscribe', type, fn, context);
+    },
+
+    // 即publish方法
+    // publication为传递给回调函数的参数
+    fire: function (type, publication) {
+        this.visitSubscribers('publish', type, publication);
+    },
+
+    // help遍历方法
+    visitSubscribers: function (action, type, arg, context) {
+        var pubtype = type || 'any',
+            subscribers = this.subscribers[pubtype],
+            i,
+            max = subscribers ? subscribers.length : 0;
            
-            for (i in players) {
-                if (players.hasOwnProperty(i)) {
-                    score[players[i].name] = players[i].points;
+        for (i = 0; i < max; i += 1) {
+            if (action === 'publish') {
+                // 支持回调方法使用this指向自身对象
+                // arg为传递给回调函数的参数，多参数请用对象包起来
+                subscribers[i].fn.call(subscribers[i].context, arg);
+            } else {
+                // 取消订阅
+                if (subscribers[i].fn === arg && subscribers[i].context === context) {
+                    subscribers.splice(i, 1);
                 }
             }
-            // 触发事件
-            this.fire('scorechange', score);
         }
-    };
+    }
+};
 
-    // 计分板
-    var scoreboard = {
-        // 待更新的HTML元素
-        element: document.getElementById('results'),
+// 使一个对象成为一个发布者
+function makePublisher(o) {
+    var i;
+    for (i in publisher) {
+        if (publisher.hasOwnProperty(i) && typeof publisher[i] === "function") {
+            o[i] = publisher[i];
+        }
+    }
+    // 非函数成员不能复用指针，需创建新对象
+    o.subscribers = {any: []};
+}
+
+
+// 玩家
+function Player(name, key) {
+    this.points = 0;
+    this.name = name;
+    this.key  = key;
+    // 触发事件
+    this.fire('newplayer', this);
+}
+Player.prototype.play = function () {
+    this.points += 1;
+    // 触发事件
+    this.fire('play', this);
+};
+
+// 游戏控制
+var game = {
+    // 记录玩家
+    // key为按键，value为玩家对象
+    keys: {},
+
+    addPlayer: function (player) {
+        var key = player.key.toString().charCodeAt(0);
+        this.keys[key] = player;
+    },
+
+    // 处理用户交互
+    handleKeypress: function (e) {
+        e = e || window.event; // IE
+        if (game.keys[e.which]) {
+            game.keys[e.which].play();
+        }
+    },
+   
+    // 如果有人玩，则更新得分值
+    handlePlay: function (player) {
+        var i,
+            players = this.keys,
+            score = {};
        
-        // 更新得分显示
-        update: function (score) {
-            var i, msg = '';
-            for (i in score) {
-                if (score.hasOwnProperty(i)) {
-                    msg += '<p><strong>' + i + '<\/strong>: ';
-                    msg += score[i];
-                    msg += '<\/p>';
-                }
+        for (i in players) {
+            if (players.hasOwnProperty(i)) {
+                score[players[i].name] = players[i].points;
             }
-            this.element.innerHTML = msg;
         }
-    };
+        // 触发事件
+        this.fire('scorechange', score);
+    }
+};
+
+// 计分板
+var scoreboard = {
+    // 待更新的HTML元素
+    element: document.getElementById('results'),
+   
+    // 更新得分显示
+    update: function (score) {
+        var i, msg = '';
+        for (i in score) {
+            if (score.hasOwnProperty(i)) {
+                msg += '<p><strong>' + i + '<\/strong>: ';
+                msg += score[i];
+                msg += '<\/p>';
+            }
+        }
+        this.element.innerHTML = msg;
+    }
+};
 
 
-    // 发布/订阅绑定
-    makePublisher(Player.prototype);  // 注意Player要绑在prototype上，避免多份拷贝
-    makePublisher(game);
+// 发布/订阅绑定
+makePublisher(Player.prototype);  // 注意Player要绑在prototype上，避免多份拷贝
+makePublisher(game);
 
-    Player.prototype.on("newplayer", "addPlayer", game);
-    Player.prototype.on("play",      "handlePlay", game);
+Player.prototype.on("newplayer", "addPlayer", game);
+Player.prototype.on("play",      "handlePlay", game);
 
-    game.on("scorechange", scoreboard.update, scoreboard);
+game.on("scorechange", scoreboard.update, scoreboard);
 
-    window.onkeypress = game.handleKeypress;
+window.onkeypress = game.handleKeypress;
 
-    // 运行游戏
-    var playername, key;
+// 运行游戏
+var playername, key;
+while (1) {
+    playername = prompt("Add player (name)");
+    if (!playername) {
+        break;
+    }
     while (1) {
-        playername = prompt("Add player (name)");
-        if (!playername) {
+        key = prompt("Key for " + playername + "?");
+        if (key) {
             break;
         }
-        while (1) {
-            key = prompt("Key for " + playername + "?");
-            if (key) {
-                break;
-            }
-        }
-        new Player(playername,  key);   
     }
+    new Player(playername,  key);   
+}
+```
 
 
 ### 中介者VS观察者

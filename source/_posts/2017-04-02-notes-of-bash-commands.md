@@ -143,7 +143,7 @@ set 命令：更健壮的脚本
 - `set -u` 阻止变量空值，抛出错误
 - `set -e` 异常 false 值是否放行
     
-    ```
+    ```bash
     false || echo 'something false here'
     ```
 

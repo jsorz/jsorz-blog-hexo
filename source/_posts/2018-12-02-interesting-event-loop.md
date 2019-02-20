@@ -12,7 +12,7 @@ tags: [javascript]
 
 ## 事故现场
 
-```javascript
+```js
 export const A = {
   methods: {
     reload() {
@@ -40,7 +40,7 @@ P.S. 别问我为什么不用 `props` 透传，因为我用 dispatch action 触�
 
 先直接给出修复后的代码，再慢慢探究原因。
 
-```javascript
+```js
 export const A = {
   methods: {
     reload() {
@@ -95,7 +95,7 @@ export const A = {
 
 test 1
 
-```javascript
+```js
 console.log(1);
 
 setTimeout(() => {
@@ -116,7 +116,7 @@ console.log(3);
 
 test 2
 
-```javascript
+```js
 console.log(1);
 
 setTimeout(() => {
@@ -137,7 +137,7 @@ console.log(3);
 
 test 3
 
-```javascript
+```js
 console.log(1);
 
 setTimeout(() => {
@@ -158,7 +158,7 @@ console.log(3);
 
 test 4
 
-```javascript
+```js
 console.log(1);
 
 setTimeout(() => {
@@ -185,7 +185,7 @@ console.log(3);
 
 ### v2.4.4
 
-```javascript
+```js
 /**
  * Defer a task to execute it asynchronously.
  */
@@ -277,7 +277,7 @@ export const nextTick = (function () {
 
 ### v2.5.17
 
-```javascript
+```js
 const callbacks = []
 let pending = false
 

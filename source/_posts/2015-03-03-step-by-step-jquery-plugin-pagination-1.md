@@ -13,11 +13,13 @@ jquery插件写法
 ----------------
 jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被jquery DOM元素直接调用。
 
-    $.fn.sayHello = function(){
-        return this.each(function(){
-            alert(this);
-        });
-    };
+```js
+$.fn.sayHello = function(){
+    return this.each(function(){
+        alert(this);
+    });
+};
+```
 
 有了这个扩展函数，可以直接对元素这样`$('#someElement').sayHello()`调用，也可以同时作用在多个元素上，像`$('.some-class').sayHello()`这样。
 
@@ -25,13 +27,15 @@ jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被
 
 完善后的`sayHello`代码如下。
 
-    $.fn.sayHello = function(){
-        return this.each(function(){
-            $(this).bind('click', function(){
-                alert('hello ' + $(this).prop('tagName'));
-            });
+```js
+$.fn.sayHello = function(){
+    return this.each(function(){
+        $(this).bind('click', function(){
+            alert('hello ' + $(this).prop('tagName'));
         });
-    };
+    });
+};
+```
 
 即这个sayHello插件会为元素绑定一个`click`事件，点击后会弹出该元素的标签名。效果如下。
 
@@ -55,14 +59,18 @@ jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被
 
 这就是这个分页插件的对外接口设计。`<div>`中支持`data-pn`和`data-tpn`两个属性，分别表示当前页码和总页数。
 
-    <div id="pagination1" data-pn="5" data-tpn="12"></div>
+```html
+<div id="pagination1" data-pn="5" data-tpn="12"></div>
+```
 
 同时`jqPagination`也支持配置参数，如下。
 
-    $('#pagination1').jqPagination({
-        pn: 5,
-        tpn: 12
-    });
+```js
+$('#pagination1').jqPagination({
+    pn: 5,
+    tpn: 12
+});
+```
 
 
 
@@ -81,146 +89,152 @@ jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被
 
 **Step 1**
 
-    $.fn.jqPagination = function(options){
+```js
+$.fn.jqPagination = function(options){
 
-        var generatePages = function($el){
+    var generatePages = function($el){
 
-            var $list = $('<ul class="' + CLASS_PAGE_LIST + '"></ul>');
-            // prePage
-            $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_PRE_PAGE + '">' + TEXT_PRE_PAGE + '</a></li>');
-            // firstPage
-            $list.append('<li class="' + CLASS_ACTIVE + '"><a href="javascript:void(0);" class="' + CLASS_PAGE + '" data-page="1">1</a></li>');
-            // preOmit
-            $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_PRE_OMIT + '">' + TEXT_OMIT + '</a></li>');
-            // nextOmit
-            $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_NEXT_OMIT + '">' + TEXT_OMIT + '</a></li>');
-            // lastPage
-            $list.append('<li class=""><a href="javascript:void(0);" class="' + CLASS_PAGE + '" data-page="">' + TEXT_EMPTY + '</a></li>');
-            // nextPage
-            $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_NEXT_PAGE + '">' + TEXT_NEXT_PAGE + '</a></li>');
-            // append to list
-            $el.empty().append($list);
+        var $list = $('<ul class="' + CLASS_PAGE_LIST + '"></ul>');
+        // prePage
+        $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_PRE_PAGE + '">' + TEXT_PRE_PAGE + '</a></li>');
+        // firstPage
+        $list.append('<li class="' + CLASS_ACTIVE + '"><a href="javascript:void(0);" class="' + CLASS_PAGE + '" data-page="1">1</a></li>');
+        // preOmit
+        $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_PRE_OMIT + '">' + TEXT_OMIT + '</a></li>');
+        // nextOmit
+        $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_NEXT_OMIT + '">' + TEXT_OMIT + '</a></li>');
+        // lastPage
+        $list.append('<li class=""><a href="javascript:void(0);" class="' + CLASS_PAGE + '" data-page="">' + TEXT_EMPTY + '</a></li>');
+        // nextPage
+        $list.append('<li class="' + CLASS_DISABLED + '"><a href="javascript:void(0);" class="' + CLASS_NEXT_PAGE + '">' + TEXT_NEXT_PAGE + '</a></li>');
+        // append to list
+        $el.empty().append($list);
 
-        };
-
-        var init = function($el){
-            $el.addClass(CLASS_PAGINATION);
-            generatePages($el);
-        };
-
-        return init(this);
     };
+
+    var init = function($el){
+        $el.addClass(CLASS_PAGINATION);
+        generatePages($el);
+    };
+
+    return init(this);
+};
+```
 
 这里直接为几个特殊的元素占好“坑”，分别是：上一页，第1页，滑动窗口向前的省略，滑动窗口向后的省略，最后一页（页码为空），下一页。具体的页码元素都是有`data-page`属性的，这里第一页和最后一页也属于具体页码。然后在Step 2中生成其他具体页码，并为这里占的“坑”设置active、disabled或hide。
 
 
 **Step 2**
 
-    var generatePages = function($el){
-        // 以上省略...
+```js
+var generatePages = function($el){
+    // 以上省略...
 
-        var $dummies = $list.children('li');
-        var dummyLen = $dummies.length;
+    var $dummies = $list.children('li');
+    var dummyLen = $dummies.length;
 
-        // targets reference
-        var $firstPage = $dummies.eq(1);
-        var $lastPage = $dummies.eq(dummyLen-2);
-        var $prePage = $dummies.first();  // eq(0)
-        var $nextPage = $dummies.last();  // eq(dummyLen-1)
-        var $preOmitted = $dummies.eq(2);
-        var $nextOmitted = $dummies.eq(dummyLen-3);
+    // targets reference
+    var $firstPage = $dummies.eq(1);
+    var $lastPage = $dummies.eq(dummyLen-2);
+    var $prePage = $dummies.first();  // eq(0)
+    var $nextPage = $dummies.last();  // eq(dummyLen-1)
+    var $preOmitted = $dummies.eq(2);
+    var $nextOmitted = $dummies.eq(dummyLen-3);
 
-        // a copy for dynamic page, initial
-        var $pageCopy = $firstPage.clone().removeAttr('class');
+    // a copy for dynamic page, initial
+    var $pageCopy = $firstPage.clone().removeAttr('class');
 
-        // page number region
-        var pn = Number(opts.pn);
-        var tpn = Number(opts.tpn);
-        var lowerPn = Math.max(pn-2, 2);  // 第1页已写在html中
-        var upperPn = Math.min(pn+2, tpn-1);  // 最后1页已写在html中
+    // page number region
+    var pn = Number(opts.pn);
+    var tpn = Number(opts.tpn);
+    var lowerPn = Math.max(pn-2, 2);  // 第1页已写在html中
+    var upperPn = Math.min(pn+2, tpn-1);  // 最后1页已写在html中
 
-        // generate new specific pages（当前页的前后2页）
-        for(var i=lowerPn; i<=upperPn; i++){
-            var $newPage = $pageCopy.clone();
-            $newPage.find('a').attr('data-page', i).text(i);
-            $newPage.insertBefore($nextOmitted);
-            // add current page flag
-            i == pn && $newPage.addClass(CLASS_ACTIVE);
-        }
+    // generate new specific pages（当前页的前后2页）
+    for(var i=lowerPn; i<=upperPn; i++){
+        var $newPage = $pageCopy.clone();
+        $newPage.find('a').attr('data-page', i).text(i);
+        $newPage.insertBefore($nextOmitted);
+        // add current page flag
+        i == pn && $newPage.addClass(CLASS_ACTIVE);
+    }
 
-        // check first page
-        $firstPage.removeClass(CLASS_ACTIVE);
-        pn == 1 && $firstPage.addClass(CLASS_ACTIVE);
+    // check first page
+    $firstPage.removeClass(CLASS_ACTIVE);
+    pn == 1 && $firstPage.addClass(CLASS_ACTIVE);
 
-        // check last page
-        $lastPage.find('a').attr('data-page', tpn).text(tpn);
-        $lastPage.removeClass(CLASS_ACTIVE);
-        pn == tpn && $lastPage.addClass(CLASS_ACTIVE);
+    // check last page
+    $lastPage.find('a').attr('data-page', tpn).text(tpn);
+    $lastPage.removeClass(CLASS_ACTIVE);
+    pn == tpn && $lastPage.addClass(CLASS_ACTIVE);
 
-        // check if last page equals first page
-        $lastPage.removeClass(CLASS_HIDE)
-        tpn == 1 && $lastPage.addClass(CLASS_HIDE);
+    // check if last page equals first page
+    $lastPage.removeClass(CLASS_HIDE)
+    tpn == 1 && $lastPage.addClass(CLASS_HIDE);
 
-        // check Previous page
-        $prePage.attr('class', CLASS_DISABLED);
-        pn > 1 && $prePage.removeClass(CLASS_DISABLED);
-        
-        // check Next page
-        $nextPage.attr('class', CLASS_DISABLED);
-        pn < tpn && $nextPage.removeClass(CLASS_DISABLED);
+    // check Previous page
+    $prePage.attr('class', CLASS_DISABLED);
+    pn > 1 && $prePage.removeClass(CLASS_DISABLED);
+    
+    // check Next page
+    $nextPage.attr('class', CLASS_DISABLED);
+    pn < tpn && $nextPage.removeClass(CLASS_DISABLED);
 
-        // check pre omitted
-        $preOmitted.removeClass(CLASS_HIDE);
-        lowerPn <= 2 && $preOmitted.addClass(CLASS_HIDE);
+    // check pre omitted
+    $preOmitted.removeClass(CLASS_HIDE);
+    lowerPn <= 2 && $preOmitted.addClass(CLASS_HIDE);
 
-        // check next omitted
-        $nextOmitted.removeClass(CLASS_HIDE);
-        upperPn == tpn-1 && $nextOmitted.addClass(CLASS_HIDE);
-    };
+    // check next omitted
+    $nextOmitted.removeClass(CLASS_HIDE);
+    upperPn == tpn-1 && $nextOmitted.addClass(CLASS_HIDE);
+};
+```
 
 这里的滑动窗口的页码范围为`Math.max(pn-2, 2)`到`Math.min(pn+2, tpn-1)`，因为第1页和最后1页已经在Step 1中占好“坑”了。生成的具体页码即当前页的前后2页，添加好`data-page`属性，插入到“坑”的相应位置。然后就是根据`pn`（当前页码）和`tpn`（总页数）对那些“坑”进行可见性的检查，该disabled的和该hide的。
 
 
 **Step 3 & 4**
 
-    var bindPageEvents = function($el){
-        // Previous page
-        $el.find('.' + CLASS_PRE_PAGE).click(function(){
-            if($(this).parent().hasClass(CLASS_DISABLED)){
-                return false;
-            }
-            var $target = $el.find('li.' + CLASS_ACTIVE).prev();
-            // omitted patch
+```js
+var bindPageEvents = function($el){
+    // Previous page
+    $el.find('.' + CLASS_PRE_PAGE).click(function(){
+        if($(this).parent().hasClass(CLASS_DISABLED)){
+            return false;
+        }
+        var $target = $el.find('li.' + CLASS_ACTIVE).prev();
+        // omitted patch
+        if($target.hasClass(CLASS_DISABLED)){
+            $target = $target.prev();
             if($target.hasClass(CLASS_DISABLED)){
                 $target = $target.prev();
-                if($target.hasClass(CLASS_DISABLED)){
-                    $target = $target.prev();
-                }
             }
-            targetClick($target);
-        });
+        }
+        targetClick($target);
+    });
 
-        // Next page
-        $el.find('.' + CLASS_NEXT_PAGE).click(function(){
-            if($(this).parent().hasClass(CLASS_DISABLED)){
-                return false;
-            }
-            var $target = $el.find('li.' + CLASS_ACTIVE).next();
-            // omitted patch
+    // Next page
+    $el.find('.' + CLASS_NEXT_PAGE).click(function(){
+        if($(this).parent().hasClass(CLASS_DISABLED)){
+            return false;
+        }
+        var $target = $el.find('li.' + CLASS_ACTIVE).next();
+        // omitted patch
+        if($target.hasClass(CLASS_DISABLED)){
+            $target = $target.next();
             if($target.hasClass(CLASS_DISABLED)){
                 $target = $target.next();
-                if($target.hasClass(CLASS_DISABLED)){
-                    $target = $target.next();
-                }
             }
-            targetClick($target);
-        });
+        }
+        targetClick($target);
+    });
 
-        // specific pages
-        $el.find('a.' + CLASS_PAGE).each(function(){
-            $(this).attr('href', getPageHref($(this).attr('data-page')));
-        });
-    };
+    // specific pages
+    $el.find('a.' + CLASS_PAGE).each(function(){
+        $(this).attr('href', getPageHref($(this).attr('data-page')));
+    });
+};
+```
 
 这里就是为具体页码和“前一页”“后一页”添加点击效果。每个具体页码都是个带有`href`属性的`<a>`标签，以直接刷新页面，这里有个`getPageHref`方法稍后描述。而点击“前一页”“后一页”实则是去找到相对于当前页的具体页码元素，然后调用`targetClick`去模拟点击，也在稍后描述。
 
@@ -230,46 +244,52 @@ jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被
 ----------
 除了前面提到的`pn`和`tpn`两个参数外，我们还需要添加两个参数。因为是直接刷新页面以获取新的分页数据，那url中肯定要有个参数表示页码，那么这个参数的key叫什么。我们提供一个默认的名字，就叫`page`，即url都长成这样`/some/to/?page=2`，当然这个参数的名字也可以自定义。还有就是，分页刷新页面默认就是当前的url，只不过`page`参数的值不同，这个url也可以自定义。
 
-    $.fn.jqPagination = function(options){
+```js
+$.fn.jqPagination = function(options){
 
-        // default option values
-        var opts = $.extend({
-            'pn': this.attr('data-pn') || 1,
-            'tpn': this.attr('data-tpn') || 1,
-            'name': 'page'
-        }, options);
+    // default option values
+    var opts = $.extend({
+        'pn': this.attr('data-pn') || 1,
+        'tpn': this.attr('data-tpn') || 1,
+        'name': 'page'
+    }, options);
 
-        // default value of 'pageHref'
-        var defaultHref = window.location.pathname + '?' + opts.name + '=';
-        if(/\?(\w+)=/.test(window.location.href)){
-            // 如果已经有参数
-            defaultHref = window.location.href + 
-                (eval('/' + opts.name + '=/').test(window.location.href) ? '' : '&' + opts.name + '=');
-        }
+    // default value of 'pageHref'
+    var defaultHref = window.location.pathname + '?' + opts.name + '=';
+    if(/\?(\w+)=/.test(window.location.href)){
+        // 如果已经有参数
+        defaultHref = window.location.href + 
+            (eval('/' + opts.name + '=/').test(window.location.href) ? '' : '&' + opts.name + '=');
+    }
 
-        opts['pageHref'] = opts['pageHref'] || defaultHref;
+    opts['pageHref'] = opts['pageHref'] || defaultHref;
 
-        // 以下省略...
-    };
+    // 以下省略...
+};
+```
 
 由此，前面提到的`getPageHref`就是去替换url里的`page`参数的值。
 
-    var getPageHref = function(pageNo){
-        return opts.pageHref.replace(eval('/' + opts.name + '=\\d*/'), opts.name + '=' + pageNo);
-    };
+```js
+var getPageHref = function(pageNo){
+    return opts.pageHref.replace(eval('/' + opts.name + '=\\d*/'), opts.name + '=' + pageNo);
+};
+```
 
 当然那个模拟点击页码的`targetClick`就是直接刷新`window.location.href`咯
 
-    var targetClick = function($li){
-        var $link = $li.find('a.' + CLASS_PAGE);
-        if(!$link.hasClass(CLASS_ACTIVE) 
-            && !$link.hasClass(CLASS_DISABLED) 
-            && !$link.hasClass(CLASS_HIDE)){
-            // 是否刷页面
-            /^\/|((http|https|svn|ftp|file):\/\/)/.test($link.prop('href')) ? 
-                (window.location.href = $link.prop('href')) : $link.click();
-        }
-    };
+```js
+var targetClick = function($li){
+    var $link = $li.find('a.' + CLASS_PAGE);
+    if(!$link.hasClass(CLASS_ACTIVE) 
+        && !$link.hasClass(CLASS_DISABLED) 
+        && !$link.hasClass(CLASS_HIDE)){
+        // 是否刷页面
+        /^\/|((http|https|svn|ftp|file):\/\/)/.test($link.prop('href')) ? 
+            (window.location.href = $link.prop('href')) : $link.click();
+    }
+};
+```
 
 
 
@@ -277,25 +297,33 @@ jquery中提供了`fn`扩展属性，任何写到`fn`中的函数，都可以被
 ----------
 提供3种使用方式，最基本的就是
 
-    <div id="pagination1" data-pn="5" data-tpn="12"></div>
+```html
+<div id="pagination1" data-pn="5" data-tpn="12"></div>
 
-    $('#pagination1').jqPagination();
+<script>
+$('#pagination1').jqPagination();
+</script>
+```
 
 
 要手动设置pn和tpn，以及分页参数名称，就像这样
 
-    $('#pagination2').jqPagination({
-        pn: 5,
-        tpn: 12,
-        name: 'p'
-    });
+```js
+$('#pagination2').jqPagination({
+    pn: 5,
+    tpn: 12,
+    name: 'p'
+});
+```
 
 
 要自定义分页url的就像这样
 
-    $('#pagination3').jqPagination({
-        pageHref: 'http://www.baidu.com?from=fuxiaode.cn&page='
-    });
+```js
+$('#pagination3').jqPagination({
+    pageHref: 'http://www.baidu.com?from=fuxiaode.cn&page='
+});
+```
 
 
 [完整Demo](/demo/Pagination/v1/demo.html)

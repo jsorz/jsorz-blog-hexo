@@ -121,33 +121,35 @@ tags: [泛型编程, Mooctest]
 
 一个简单的Model类定义如下
 
-	import javax.persistence.*;
-	import play.db.jpa.Model;
+```java
+import javax.persistence.*;
+import play.db.jpa.Model;
 
-	@Entity
-	@Table(name="exam")
-	public class Exam extends Model {
-		
-		@Column(name="exam_name")
-		private String examName;
-		
-		@ManyToOne
-		@JoinColumn(name="tea_id", referencedColumnName="id")
-		private Teacher teacher;
-		
-		public String getExamName() {
-			return examName;
-		}
-		public void setExamName(String examName) {
-			this.examName = examName;
-		}
-		public Teacher getTeacher() {
-			return teacher;
-		}
-		public void setTeacher(Teacher teacher) {
-			this.teacher = teacher;
-		}
+@Entity
+@Table(name="exam")
+public class Exam extends Model {
+	
+	@Column(name="exam_name")
+	private String examName;
+	
+	@ManyToOne
+	@JoinColumn(name="tea_id", referencedColumnName="id")
+	private Teacher teacher;
+	
+	public String getExamName() {
+		return examName;
 	}
+	public void setExamName(String examName) {
+		this.examName = examName;
+	}
+	public Teacher getTeacher() {
+		return teacher;
+	}
+	public void setTeacher(Teacher teacher) {
+		this.teacher = teacher;
+	}
+}
+```
 
 也是通过简单的Annotation来配置数据库字段和成员变量的对应关系，以及一对多/多对多的关系。注意，这里不需要给`Exam`添加额外的`id`字段了，因为在`Model`父类中已经由JPA自带了`id`字段，格式为`Long`，所以数据库表里定义id字段时要注意设置“自增”和`int(32)`。
 
@@ -158,61 +160,65 @@ DAO事务与泛型编程
 
 我在以前的文章中写过关于[JPA泛型DAO](/blog/2015/02/generic-dao-for-jpa.html)，需要定义一个泛型的`GenericDao`类，提供通用的增删改查操作。
 
-	public abstract class GenericDao<T, PK extends Serializable> {
-		
-		private Class<T> clazz;
-		
-		public GenericDao(){
-			// 反射获取T.class，实参类型
-			clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-		}
-		
-		public T findById(PK id){
-			return (T) JPA.em().find(clazz, id);
-		}
-		
-		public List<T> findByColumn(String columnName , Object value){
-			String[] columnNames = new String[1];
-			Object[] values = new Object[1];
-			
-			columnNames[0] = columnName;
-			values[0] = value;
-			
-			return findByColumns(columnNames , values);
-		}
-		
-		public List<T> findByColumns(String[] columnNames , Object[] value){
-			String sqlPart = "";
-			for (int columnIdx = 0 ; columnIdx < columnNames.length ; columnIdx++){
-				sqlPart += "e." + columnNames[columnIdx] + " = '" + value[columnIdx].toString() + "'";
-				if (columnIdx < columnNames.length - 1){
-					sqlPart += " and ";
-				}
-			}
-			
-			return (List<T>) JPA.em().createQuery("select e from " + clazz.getName() + " e where " + sqlPart).getResultList();
-		}
+```java
+public abstract class GenericDao<T, PK extends Serializable> {
+	
+	private Class<T> clazz;
+	
+	public GenericDao(){
+		// 反射获取T.class，实参类型
+		clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
 	}
+	
+	public T findById(PK id){
+		return (T) JPA.em().find(clazz, id);
+	}
+	
+	public List<T> findByColumn(String columnName , Object value){
+		String[] columnNames = new String[1];
+		Object[] values = new Object[1];
+		
+		columnNames[0] = columnName;
+		values[0] = value;
+		
+		return findByColumns(columnNames , values);
+	}
+	
+	public List<T> findByColumns(String[] columnNames , Object[] value){
+		String sqlPart = "";
+		for (int columnIdx = 0 ; columnIdx < columnNames.length ; columnIdx++){
+			sqlPart += "e." + columnNames[columnIdx] + " = '" + value[columnIdx].toString() + "'";
+			if (columnIdx < columnNames.length - 1){
+				sqlPart += " and ";
+			}
+		}
+		
+		return (List<T>) JPA.em().createQuery("select e from " + clazz.getName() + " e where " + sqlPart).getResultList();
+	}
+}
+```
 
 而具体Model都有具体的Dao去继承它
 
-	public class ExamDao extends GenericDao<Exam, Long> {
+```java
+public class ExamDao extends GenericDao<Exam, Long> {
+	
+	public Exam findByTeaIdAndExamName(long teaId, String examName) {
+		String[] columns = {"teacher.id" , "examName"};
+		Object[] values = {teaId , examName};
+		List<Exam> list = this.findByColumns(columns, values);
 		
-		public Exam findByTeaIdAndExamName(long teaId, String examName) {
-			String[] columns = {"teacher.id" , "examName"};
-			Object[] values = {teaId , examName};
-			List<Exam> list = this.findByColumns(columns, values);
-			
-			if (list != null && list.size() > 0){
-				return list.get(0);
-			}
-			return null;
+		if (list != null && list.size() > 0){
+			return list.get(0);
 		}
-
-		public List<Exam> findByTeaOpenid(String teaOpenid) {
-			return this.findByColumn("teacher.teaOpenid", teaOpenid);
-		}
+		return null;
 	}
+
+	public List<Exam> findByTeaOpenid(String teaOpenid) {
+		return this.findByColumn("teacher.teaOpenid", teaOpenid);
+	}
+}
+```
 
 关于`GenericDao`的更多细节请看[JPA泛型DAO](/blog/2015/02/generic-dao-for-jpa.html)
 
@@ -225,19 +231,21 @@ DAO事务与泛型编程
 
 ### route配置规范
 
-	# 非登录的页面
-	GET		/										Application.index
-	GET		/faq/{category}/{sub}					Application.{category}{sub}FAQ
+```
+# 非登录的页面
+GET		/										Application.index
+GET		/faq/{category}/{sub}					Application.{category}{sub}FAQ
 
-	# 登录和注册
-	POST	/login									LoginController.login
+# 登录和注册
+POST	/login									LoginController.login
 
-	# 角色的功能模块
-	*		/tea/{action}							TeacherController.{action}
-	*       /tea/exam/{action}            			TeaExamController.{action}
+# 角色的功能模块
+*		/tea/{action}							TeacherController.{action}
+*       /tea/exam/{action}            			TeaExamController.{action}
 
-	# Map static resources from the /app/public folder to the /public path
-	GET     /public/                                staticDir:public
+# Map static resources from the /app/public folder to the /public path
+GET     /public/                                staticDir:public
+```
 
 路由配置支持定义请求方式`GET` or `POST`，也可以使用通配符，注意对于“更改”操作一定要使用`POST`，这是http的规范。url和`Controller`中的方法一一对应，并且支持变量替代，减少相似的配置条目。
 
@@ -284,59 +292,63 @@ DAO事务与泛型编程
 
 ### 系统语言判断
 
-	public class Application extends Controller {
-		
-		static final String DEFAULT_LANGUAGE = "zh_CN";
-		
-		@Before
-		static void setGlobalLang(){
-			// langAction会将lang存入session
-			String lang = SessionUtil.getLang(session);
-	    	if(lang == null){
-	    		// 获取浏览器系统语言
-	    		List<String> langs = request.acceptLanguage();
-	    		for(String temp : langs){
-	    			// 浏览器发送的为 zh-CN
-	    			if(temp.contains("zh")){
-	    				temp = DEFAULT_LANGUAGE;
-	    			}
-	    			if(Play.langs.contains(temp)){
-	    				lang = temp;
-	    				break;
-	    			}
-	    		}
-	    		if(lang == null){
-	    			lang = DEFAULT_LANGUAGE;
-	    		}
-	    		// 更新到session
-	    		SessionUtil.putLang(session, lang);
-	    	}
-	    	Lang.set(lang);
-		}
+```java
+public class Application extends Controller {
+	
+	static final String DEFAULT_LANGUAGE = "zh_CN";
+	
+	@Before
+	static void setGlobalLang(){
+		// langAction会将lang存入session
+		String lang = SessionUtil.getLang(session);
+    	if(lang == null){
+    		// 获取浏览器系统语言
+    		List<String> langs = request.acceptLanguage();
+    		for(String temp : langs){
+    			// 浏览器发送的为 zh-CN
+    			if(temp.contains("zh")){
+    				temp = DEFAULT_LANGUAGE;
+    			}
+    			if(Play.langs.contains(temp)){
+    				lang = temp;
+    				break;
+    			}
+    		}
+    		if(lang == null){
+    			lang = DEFAULT_LANGUAGE;
+    		}
+    		// 更新到session
+    		SessionUtil.putLang(session, lang);
+    	}
+    	Lang.set(lang);
 	}
+}
+```
 
 这里使用Play框架里的**拦截器**的概念，即上面Annotation的`@Before`，使得每个页面的action都会先执行`setGlobalLang`。语言的判断顺序为：先取session里存的语言，再取浏览器request头里传来的系统支持语言，都取不到时再提供个默认语言。
 
 此外，还需为首页的中英文切换再提供个额外的action
 
-	public class Application extends Controller {
-		
-		/** 多语言 */
-	    public static void langAction(){
-	    	String lang = params.get("lang");
-	    	setLang(lang);
-	    	index("");
-	    }
-	    
-	    static void setLang(String lang){
-	    	if(lang == null || !Play.langs.contains(lang)){
-	    		lang = DEFAULT_LANGUAGE;
-	    	}
-	    	// 更新到session
-	    	SessionUtil.putLang(session, lang);
-	    	Lang.set(lang);
-	    }
-	}
+```java
+public class Application extends Controller {
+	
+	/** 多语言 */
+    public static void langAction(){
+    	String lang = params.get("lang");
+    	setLang(lang);
+    	index("");
+    }
+    
+    static void setLang(String lang){
+    	if(lang == null || !Play.langs.contains(lang)){
+    		lang = DEFAULT_LANGUAGE;
+    	}
+    	// 更新到session
+    	SessionUtil.putLang(session, lang);
+    	Lang.set(lang);
+    }
+}
+```
 
 ### 语言字典
 
@@ -344,13 +356,15 @@ DAO事务与泛型编程
 
 Play框架在这一点方面做的比较简陋，好像一个语言只能有一个字典文件，因此我们需要使用“命名空间”的概念进行分组管理。
 
-	#key格式：页面名.[groupName].xxx
-	#通用页面   common.[groupName].xxx
+```
+#key格式：页面名.[groupName].xxx
+#通用页面   common.[groupName].xxx
 
-	#首页
-	################################
-	index.links.guide = GUIDE
-	index.links.download = DOWNLOADS
+#首页
+################################
+index.links.guide = GUIDE
+index.links.download = DOWNLOADS
+```
 
 这里配置了英文文案，同样也要在`messages.zh_CN`文件里配置相同key的中文文案。
 
@@ -359,10 +373,12 @@ Play框架在这一点方面做的比较简陋，好像一个语言只能有一�
 
 如果要在后端的`Controller`里向前端返回错误文案，多语言的支持得使用 `play.i18n.Messages`
 
-	// import play.i18n.Messages;
+```java
+// import play.i18n.Messages;
 
-	// 这里的文案key与上面的语言字典中保持一致
-	Messages.get("LoginController.accountNotExist")
+// 这里的文案key与上面的语言字典中保持一致
+Messages.get("LoginController.accountNotExist")
+```
 
 
 ### 前端的文案
@@ -373,14 +389,16 @@ Play框架在这一点方面做的比较简陋，好像一个语言只能有一�
 
 我们需要在所有页面的base父页面中定义一个内联script，事先定义好所有`.js`中需要使用到的文案。
 
-	<!-- 全局多语言文案，供通用js使用 -->
-    <script type="text/javascript">
-    window.LANG_TEXT = {
-        OK: "&{'common.btn.ok'}",
-        CANCEL: "&{'common.btn.cancel'}",
-        DONE: "&{'common.btn.done'}"
-    };
-    </script>
+```html
+<!-- 全局多语言文案，供通用js使用 -->
+<script type="text/javascript">
+window.LANG_TEXT = {
+    OK: "&{'common.btn.ok'}",
+    CANCEL: "&{'common.btn.cancel'}",
+    DONE: "&{'common.btn.done'}"
+};
+</script>
+```
 
 内联script是在模板文件中的，可以被Play框架处理，于是语言文案就被存在了全局`window`里。在具体功能的`.js`文件中可以直接使用`window.LANG_TEXT`变量。
 
@@ -399,9 +417,11 @@ Play框架在这一点方面做的比较简陋，好像一个语言只能有一�
 
 设置一个域名的mx、txt和cname记录，以example.com域为例：
 
-	edm.example.com CNAME edm.edmcn.cn
-	edm.example.com MX sender.f.wsztest.com
-	edm.example.com TXT v=spf1 include:spf.ezcdn.cn ~all
+```
+edm.example.com CNAME edm.edmcn.cn
+edm.example.com MX sender.f.wsztest.com
+edm.example.com TXT v=spf1 include:spf.ezcdn.cn ~all
+```
 
 域名解析成功后，就可在EDM管理平台使用自己域名验证过的邮箱地址了，比如叫`service@edm.mooctest.net`，就可以大大减少邮件被扔进垃圾箱的概率。
 
@@ -409,113 +429,117 @@ Play框架在这一点方面做的比较简陋，好像一个语言只能有一�
 
 上面的配置都完成后，确保在EDM管理平台上可以成功发邮件后，就可以去申请开通EDM-SMTP服务。在程序中可以通过`javax.mail`库去建立邮件Transport协议。
 
-	import java.io.UnsupportedEncodingException;
-	import java.util.List;
-	import java.util.Properties;
+```java
+import java.io.UnsupportedEncodingException;
+import java.util.List;
+import java.util.Properties;
 
-	import javax.mail.MessagingException;
-	import javax.mail.Session;
-	import javax.mail.Transport;
-	import javax.mail.internet.AddressException;
-	import javax.mail.internet.InternetAddress;
-	import javax.mail.internet.MimeMessage;
-	import javax.mail.internet.MimeMessage.RecipientType;
+import javax.mail.MessagingException;
+import javax.mail.Session;
+import javax.mail.Transport;
+import javax.mail.internet.AddressException;
+import javax.mail.internet.InternetAddress;
+import javax.mail.internet.MimeMessage;
+import javax.mail.internet.MimeMessage.RecipientType;
 
-	import common.Constants;
+import common.Constants;
+
+public class SimpleMailSender {
+
+	private static final String SMTP_EDM = "smtp.trigger.edmcn.cn";
 	
-	public class SimpleMailSender {
+    private final transient Properties props = System.getProperties();
+    private transient MailAuthenticator authenticator;
+    private transient Session session;
+    
+    public SimpleMailSender(final String smtpHostName, final String username,
+        final String password) {
+    	init(username, password, smtpHostName);
+    }
 
-		private static final String SMTP_EDM = "smtp.trigger.edmcn.cn";
-		
-	    private final transient Properties props = System.getProperties();
-	    private transient MailAuthenticator authenticator;
-	    private transient Session session;
-	    
-	    public SimpleMailSender(final String smtpHostName, final String username,
-	        final String password) {
-	    	init(username, password, smtpHostName);
-	    }
+    public SimpleMailSender(final String username, final String password) {
+    	String smtpHost;
+    	// EDM帐号
+    	if(isEDM(username)){
+    		smtpHost = SMTP_EDM;
+    	}
+    	else{
+    		smtpHost = "smtp." + username.split("@")[1];
+    	}
+    	
+    	init(username, password, smtpHost);
+    }
+
+    private void init(String username, String password, String smtpHostName) {
+	    props.put("mail.smtp.auth", "true");
+	    props.put("mail.smtp.host", smtpHostName);
+	    authenticator = new MailAuthenticator(username, password);
+	    session = Session.getInstance(props, authenticator);
+    }
+    
+    private boolean isEDM(String account){
+    	if(account.startsWith("edmc") && !account.contains("@")){
+    		return true;
+    	}
+    	return false;
+    }
+    
+    private InternetAddress getSenderAddress() throws AddressException, UnsupportedEncodingException{
+    	if(isEDM(authenticator.getUsername())){
+    		return new InternetAddress(Constants.EDM_SENDER_ADDRESS, Constants.EDM_SENDER_NAME);
+    	}
+    	return new InternetAddress(authenticator.getUsername(), Constants.DEFAULT_SENDER_NAME);
+    }
 	
-	    public SimpleMailSender(final String username, final String password) {
-	    	String smtpHost;
-	    	// EDM帐号
-	    	if(isEDM(username)){
-	    		smtpHost = SMTP_EDM;
-	    	}
-	    	else{
-	    		smtpHost = "smtp." + username.split("@")[1];
-	    	}
-	    	
-	    	init(username, password, smtpHost);
-	    }
-
-	    private void init(String username, String password, String smtpHostName) {
-		    props.put("mail.smtp.auth", "true");
-		    props.put("mail.smtp.host", smtpHostName);
-		    authenticator = new MailAuthenticator(username, password);
-		    session = Session.getInstance(props, authenticator);
-	    }
+    public void send(List<String> recipients, String subject, Object content)
+        throws AddressException, MessagingException, UnsupportedEncodingException {
+	    final MimeMessage message = new MimeMessage(session);
+	    message.setFrom(getSenderAddress());
 	    
-	    private boolean isEDM(String account){
-	    	if(account.startsWith("edmc") && !account.contains("@")){
-	    		return true;
-	    	}
-	    	return false;
+	    final int num = recipients.size();
+	    InternetAddress[] addresses = new InternetAddress[num];
+	    for (int i = 0; i < num; i++) {
+	        addresses[i] = new InternetAddress(recipients.get(i));
 	    }
+	    message.setRecipients(RecipientType.TO, addresses);
 	    
-	    private InternetAddress getSenderAddress() throws AddressException, UnsupportedEncodingException{
-	    	if(isEDM(authenticator.getUsername())){
-	    		return new InternetAddress(Constants.EDM_SENDER_ADDRESS, Constants.EDM_SENDER_NAME);
-	    	}
-	    	return new InternetAddress(authenticator.getUsername(), Constants.DEFAULT_SENDER_NAME);
-	    }
-		
-	    public void send(List<String> recipients, String subject, Object content)
-	        throws AddressException, MessagingException, UnsupportedEncodingException {
-		    final MimeMessage message = new MimeMessage(session);
-		    message.setFrom(getSenderAddress());
-		    
-		    final int num = recipients.size();
-		    InternetAddress[] addresses = new InternetAddress[num];
-		    for (int i = 0; i < num; i++) {
-		        addresses[i] = new InternetAddress(recipients.get(i));
-		    }
-		    message.setRecipients(RecipientType.TO, addresses);
-		    
-		    message.setSubject(subject);
-		    message.setContent(content.toString(), "text/html;charset=utf-8");
-		    Transport.send(message);
-	    }
-	}
+	    message.setSubject(subject);
+	    message.setContent(content.toString(), "text/html;charset=utf-8");
+	    Transport.send(message);
+    }
+}
+```
 
 ### 队列设计
 
 使用过EDM发送邮件的人会知道，就算我们配置了自己域名的邮箱地址，在使用SMTP协议发送时，也会遇到频率过快，或者对方邮箱拒收，等失败情况。因此我们要设计一套容错和重试的机制。
 
-	import javax.persistence.*;
-	import play.db.jpa.Model;
+```java
+import javax.persistence.*;
+import play.db.jpa.Model;
 
-	@Entity
-	@Table(name="email_task")
-	public class EmailTask extends Model {
-		@Column(name="receiver")
-		private String receiver;
-		
-		@Column(name="subject")
-		private String subject;
-		
-		@Column(name="content")
-		private String content;
-		
-		@Column(name="try_times")
-		private Integer tryTimes;
-		
-		public EmailTask(){
-			// default
-			this.tryTimes = 0;
-		}
-		// 省略getter和setter
+@Entity
+@Table(name="email_task")
+public class EmailTask extends Model {
+	@Column(name="receiver")
+	private String receiver;
+	
+	@Column(name="subject")
+	private String subject;
+	
+	@Column(name="content")
+	private String content;
+	
+	@Column(name="try_times")
+	private Integer tryTimes;
+	
+	public EmailTask(){
+		// default
+		this.tryTimes = 0;
 	}
+	// 省略getter和setter
+}
+```
 
 如本文上面提到的[数据库与ORM](#orm)所述，这里设计一个`EmailTask`的Model，记录下收件人、主题和正文内容，再额外存个`tryTimes`字段。这里我们可以规定，当重试3次仍失败后，就忽略该邮件任务。
 
@@ -525,85 +549,91 @@ Play框架在这一点方面做的比较简陋，好像一个语言只能有一�
 
 上面的邮件队列设计中所说的“立即邮件”和“非立即邮件”，其实就是“立即任务”和“定时任务”。在Play框架中有[Jobs](https://www.playframework.com/documentation/1.2.x/jobs)来实现任务调度。
 
-	import play.jobs.Job;
+```java
+import play.jobs.Job;
 
-	public class InstantMailJob extends Job {
-		
-		private static EmailTaskDao taskDao = new EmailTaskDao();
-		
-		private String receiver;
-		private String subject;
-		private String content;
-		
-		public InstantMailJob(String receiver, String subject, String content){
-			this.receiver = receiver;
-			this.subject = subject;
-			this.content = content;
-		}
+public class InstantMailJob extends Job {
+	
+	private static EmailTaskDao taskDao = new EmailTaskDao();
+	
+	private String receiver;
+	private String subject;
+	private String content;
+	
+	public InstantMailJob(String receiver, String subject, String content){
+		this.receiver = receiver;
+		this.subject = subject;
+		this.content = content;
+	}
 
-		public void doJob(){
-			try {
-				MailJobUtil.sendMail(receiver, subject, content);
-				
-			} catch (Exception e) {
-				e.printStackTrace();
-				System.out.println("Send mail error for receiver " + receiver);
-				
-				// 发送失败，加入task，待下次再发
-				EmailTask task = new EmailTask();
-				task.setReceiver(receiver);
-				task.setSubject(subject);
-				task.setContent(content);
-				// 已失败1次
-				task.setTryTimes(1);
-				
-				taskDao.save(task);
-			}
+	public void doJob(){
+		try {
+			MailJobUtil.sendMail(receiver, subject, content);
+			
+		} catch (Exception e) {
+			e.printStackTrace();
+			System.out.println("Send mail error for receiver " + receiver);
+			
+			// 发送失败，加入task，待下次再发
+			EmailTask task = new EmailTask();
+			task.setReceiver(receiver);
+			task.setSubject(subject);
+			task.setContent(content);
+			// 已失败1次
+			task.setTryTimes(1);
+			
+			taskDao.save(task);
 		}
 	}
+}
+```
 
 这就是“立即邮件”任务的Job，得 override `doJob`方法，邮件发送失败的话就加入`EmailTask`。使用时如下调用即可
 
-	new InstantMailJob(receiver, subject, content).now();
+```java
+new InstantMailJob(receiver, subject, content).now();
+```
 
 而对于“非立即邮件”任务，要使用Play框架的定时任务Job，并且设置间隔时间。
 
-	import play.jobs.Every;
-	import play.jobs.Job;
+```java
+import play.jobs.Every;
+import play.jobs.Job;
 
-	@Every("1mn")
-	public class BackgroundMailJob extends Job {
+@Every("1mn")
+public class BackgroundMailJob extends Job {
+	
+	private static EmailTaskDao taskDao = new EmailTaskDao();
+
+	public void doJob(){
+		// 避免邮件服务器异常，一次只发前10个
+		List<EmailTask> tasks = taskDao.getTopTasks();
 		
-		private static EmailTaskDao taskDao = new EmailTaskDao();
-
-		public void doJob(){
-			// 避免邮件服务器异常，一次只发前10个
-			List<EmailTask> tasks = taskDao.getTopTasks();
-			
-			for(EmailTask task : tasks){
-				try {
-					MailJobUtil.sendMail(task.getReceiver(), task.getSubject(), task.getContent());
-					
-				} catch (Exception e) {
-					e.printStackTrace();
-					System.out.println("Send mail error for receiver " + task.getReceiver());
-					
-					// 把当前任务加到队尾
-					EmailTask failedTask = new EmailTask();
-					failedTask.setReceiver(task.getReceiver());
-					failedTask.setSubject(task.getSubject());
-					failedTask.setContent(task.getContent());
-					// 累计失败次数
-					failedTask.setTryTimes(task.getTryTimes() + 1);
-					
-					taskDao.save(failedTask);
-				}
+		for(EmailTask task : tasks){
+			try {
+				MailJobUtil.sendMail(task.getReceiver(), task.getSubject(), task.getContent());
 				
-				// 删除成功的任务
-				taskDao.remove(task);
+			} catch (Exception e) {
+				e.printStackTrace();
+				System.out.println("Send mail error for receiver " + task.getReceiver());
+				
+				// 把当前任务加到队尾
+				EmailTask failedTask = new EmailTask();
+				failedTask.setReceiver(task.getReceiver());
+				failedTask.setSubject(task.getSubject());
+				failedTask.setContent(task.getContent());
+				// 累计失败次数
+				failedTask.setTryTimes(task.getTryTimes() + 1);
+				
+				taskDao.save(failedTask);
 			}
+			
+			// 删除成功的任务
+			taskDao.remove(task);
 		}
 	}
+}
+```
 
 同样也要 override `doJob`方法，但这里还得设置任务周期 `@Every("1mn")`，这个有点类似linux中的crontab。我这里设置了每1分钟执行一次任务，为了避免邮件SMTP调用频率太快而失败，每次执行Job时只取队列中前几个`EmailTask`。
 

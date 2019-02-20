@@ -19,11 +19,15 @@ git通用配置
 
 ### 生成 ssh key
 
-	ssh-keygen -t rsa -C "your_email@example.com"
+```bash
+ssh-keygen -t rsa -C "your_email@example.com"
+```
 
 会有提示，一路空格即可，会在 `~/.ssh/` 下生成 `id_rsa` 和 `id_rsa.pub` 两个文件，需要将公钥（即`id_rsa.pub`）的内容添加到 github/gitlab 的账户ssh key设置里。
 
-	cat ~/.ssh/id_rsa.pub
+```bash
+cat ~/.ssh/id_rsa.pub
+```
 	
 结果为：`ssh-rsa AAAA省略几百个字符+yMS5Nl4F “your_email@example.com”` 可以看到末尾就是你的邮箱。如果这是你的gitlab账号，那就把它加到gitlab的ssh key setting里。但如果你又想用github，又不幸的是你github账号不是这个邮箱，那么sorry，你得重新把这个新的`id_rsa.pub`添加到account setting里。
 
@@ -33,27 +37,33 @@ git通用配置
 
 如果你要从零开始搭一个project，并且把代码传到git上，就像下面这样，先去 github/gitlab 上建个仓库。
 
-	git clone git@your_git_repo.git
-	cd your_git_repo
-	touch README.md
-	git add README.md
-	git commit -m "add README"
-	git push -u origin master
+```bash
+git clone git@your_git_repo.git
+cd your_git_repo
+touch README.md
+git add README.md
+git commit -m "add README"
+git push -u origin master
+```
 
 ### 已有仓库
 
 如果你已经有project了，如果原来是用svn管理代码的，那需要先把 `.svn` 这样的目录删掉。这是svn自己生成的文件，用来比对更改的，其实文件挺大的，一般至少占project目录总大小的1/3
 
-	find . -type d -name '.svn' | xargs rm -rf
+```bash
+find . -type d -name '.svn' | xargs rm -rf
+```
 	
 上面命令的意思是：先(递归)找到当前路径下含有`.svn`的文件目录，再经`xargs`逐个删除。现在终于可以将project迁移到git了！
 
-	cd your_project
-	git init
-	git remote add origin git@your_git_repo.git
-	git add .
-	git commit
-	git push -u origin master
+```bash
+cd your_project
+git init
+git remote add origin git@your_git_repo.git
+git add .
+git commit
+git push -u origin master
+```
 
 
 多仓库user配置
@@ -62,8 +72,10 @@ git通用配置
 
 研究后发现是 git config 的问题，在公司实习的时候误用了下面两条命令
 
-	git config --global user.name "Your Name"
-	git config --global user.email "your_email@example.com"
+```bash
+git config --global user.name "Your Name"
+git config --global user.email "your_email@example.com"
+```
 
 `--global`选项是会覆盖全局的，就是说你在home下的任何目录不管使用 github 还是 gitlab，只要你用 git commit 提交，都会默认先取 global user 作为 contributor，可能会导致和你 github/gitlab 账号不符！
 
@@ -73,33 +85,41 @@ git通用配置
 
 2. 假设我现在gitlab用的最多
 
-		cd your_gitlab_repo
-		git config --global user.name "Your Name"
-		git config --global user.email "your_email@gitlab.com"
+```bash
+cd your_gitlab_repo
+git config --global user.name "Your Name"
+git config --global user.email "your_email@gitlab.com"
+```
 	
 3. 然后要去github里改回github的账号，防止被当成其他contributor
 
-		cd your_github_repo
-		git config --local user.name "Your Name"
-		git config --local user.email "your_email@github.com"
+```bash
+cd your_github_repo
+git config --local user.name "Your Name"
+git config --local user.email "your_email@github.com"
+```
 
 	注意这里用的是 `--local` 选项，不会覆盖全局，只在当前目录生效
 
 4. 在github的仓库的里查看
 
-		git config --list
+```bash
+git config --list
+```
 
 	可以看到最上面是global user，最下面是重写的local user
 	
-		push.default=matching
-		user.name=Global Name
-		user.email=your_email@gitlab.com
-		省略...
-		remote.origin.url=git@your_github_repo.git
-		branch.master.remote=origin
-		branch.master.merge=refs/heads/master
-		user.name=Local Name
-		user.email=your_email@github.com
+```
+push.default=matching
+user.name=Global Name
+user.email=your_email@gitlab.com
+省略...
+remote.origin.url=git@your_github_repo.git
+branch.master.remote=origin
+branch.master.merge=refs/heads/master
+user.name=Local Name
+user.email=your_email@github.com
+```
 
 终于经过一番更改后，再看github，就恢复正常啦！
 
@@ -110,8 +130,10 @@ gitignore
 ----------
 最后再补充一点关于gitignore的配置，我觉得这个功能比svn好用多了！
 
-	cd your_git_repo
-	touch .gitignore
+```bash
+cd your_git_repo
+touch .gitignore
+```
 
 配置语法：
 

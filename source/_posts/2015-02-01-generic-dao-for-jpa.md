@@ -24,30 +24,36 @@ JPA全称Java Persistence API。JPA通过JDK 5.0注解或XML描述对象关系�
 ---------
 1.我们首先要建一个叫`GenericDao`的抽象类
 
-    public abstract class GenericDao<T, PK extends Serializable> {
-        private Class<T> clazz;
+```java
+public abstract class GenericDao<T, PK extends Serializable> {
+    private Class<T> clazz;
 
-        public GenericDao(){
-            // 反射获取T.class，实参类型
-            clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        }
+    public GenericDao(){
+        // 反射获取T.class，实参类型
+        clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
+}
+```
 
 T代表实体类型，PK代表主键类型。
 
 
 2.实体对应的DAO类去继承`GenericDao`
 
-    public class ExamDao extends GenericDao<Exam, Long> {
+```java
+public class ExamDao extends GenericDao<Exam, Long> {
 
-    }
+}
+```
 
 这里`Exam`是实体类型，`Long`是主键类型。
 
 
 3.业务层使用DAO时创建具体DAO的实例
 
-    ExamDao examDao = new ExamDao();
+```java
+ExamDao examDao = new ExamDao();
+```
 
 
 我们系统中所有的DAO都按照这样的规范来写：
@@ -63,179 +69,193 @@ c) 具体DAO中特有的方法就写在自己的DAO类里
 统一实现的query
 ----------------
 
-    public T findById(PK id){
-        return (T) JPA.em().find(clazz, id);
-    }
+```java
+public T findById(PK id){
+    return (T) JPA.em().find(clazz, id);
+}
 
-    public List<T> findAll(){
-        return (List<T>) JPA.em().createQuery("select e from " + clazz.getName() + " e").getResultList();
-    }
+public List<T> findAll(){
+    return (List<T>) JPA.em().createQuery("select e from " + clazz.getName() + " e").getResultList();
+}
 
-    public void save(T instance){
-        JPA.em().persist(instance);
-    }
-    
-    public void saveList(List<T> instances){
-        EntityManager manager = JPA.em();
-        for (T instance : instances){
-            manager.persist(instance);
-        }
-    }
+public void save(T instance){
+    JPA.em().persist(instance);
+}
 
-    public void refresh(T instance){
-        JPA.em().refresh(instance);
+public void saveList(List<T> instances){
+    EntityManager manager = JPA.em();
+    for (T instance : instances){
+        manager.persist(instance);
     }
-    
-    public void delete(PK id){
-        JPA.em().createQuery("delete from " + clazz.getName() + " e where e.id=" + id).executeUpdate();
-    }
+}
+
+public void refresh(T instance){
+    JPA.em().refresh(instance);
+}
+
+public void delete(PK id){
+    JPA.em().createQuery("delete from " + clazz.getName() + " e where e.id=" + id).executeUpdate();
+}
+```
 
 这是拍脑袋首先想出来的一些方法，最最简单的增删改查，肯定每个实体的DAO中都要用到。大致看看好像没有问题，但是细思极恐，因为一般系统中用的最多的是按条件且带分页的查询，甚至还带排序，简单一个`findAll`真是图样图森破。
 
 
 1.首先我们要实现一个带分页带排序项的`findAll`方法。
 
-    public List<T> findAll(int pageNo, String orderBy, String order){
-        return find(getHQLString(null, null, orderBy, order), new Object[]{}, pageNo);
-    }
+```java
+public List<T> findAll(int pageNo, String orderBy, String order){
+    return find(getHQLString(null, null, orderBy, order), new Object[]{}, pageNo);
+}
+```
 
 这里的`find`内部利用Java反射，调用了JPA为具体实体类附加的查询方法。
 
-    protected List<T> find(String query, Object[] params, Integer pageNo){
-        try {
-            Method method = clazz.getMethod("find", new Class[]{String.class, Object[].class});
-            JPAQuery queryObj = (JPAQuery) method.invoke(clazz, new Object[]{query, params});
-            
-            if(pageNo != null){
-                return queryObj.fetch(pageNo, Constants.PAGE_SIZE);
-            }
-            else{
-                return queryObj.fetch();
-            }
-            
-        } catch (Exception e) {
-            return new ArrayList<T>();
+```java
+protected List<T> find(String query, Object[] params, Integer pageNo){
+    try {
+        Method method = clazz.getMethod("find", new Class[]{String.class, Object[].class});
+        JPAQuery queryObj = (JPAQuery) method.invoke(clazz, new Object[]{query, params});
+        
+        if(pageNo != null){
+            return queryObj.fetch(pageNo, Constants.PAGE_SIZE);
         }
+        else{
+            return queryObj.fetch();
+        }
+        
+    } catch (Exception e) {
+        return new ArrayList<T>();
     }
+}
+```
 
 这里的`pageNo`是`Integer`类型，为`null`时代表不分页。而`query`是我们手工拼成的一个HQL query，下面来看看这个方法。
 
-    private String getHQLString(String[] columns, String[] signs, String orderBy, String order){
-        StringBuilder builder = new StringBuilder();
-        
-        if(columns != null && columns.length > 0){
-            for(int i=0; i<columns.length; i++){
-                builder.append(columns[i] + " " + signs[i] + " ?");
-                if(i < columns.length - 1){
-                    builder.append(" and ");
-                }
+```java
+private String getHQLString(String[] columns, String[] signs, String orderBy, String order){
+    StringBuilder builder = new StringBuilder();
+    
+    if(columns != null && columns.length > 0){
+        for(int i=0; i<columns.length; i++){
+            builder.append(columns[i] + " " + signs[i] + " ?");
+            if(i < columns.length - 1){
+                builder.append(" and ");
             }
         }
-        
-        if(orderBy != null){
-            builder.append(" order by " + orderBy + " " + order);
-        }
-        return builder.toString();
     }
+    
+    if(orderBy != null){
+        builder.append(" order by " + orderBy + " " + order);
+    }
+    return builder.toString();
+}
+```
 
 这里`columns`表示查询需要比较的字段，而`signs`表示比较时的符号（小于、等于、大于等等）。最后返回的HQL形如`columnX = ? and columnY < ? orderBy columnZ desc`。最后将这个HQL传给`find`，配上实际的参数值（即“?”的填充值），再调用JPA提供的`find`来`fetch`出相应的结果，以完成分页查询。这个查询过程就如此，注意这里我们将“页”的大小存到了一个常量中。
 
 
 2.为`signs`和`order`定义一些常量，以及帮助方法。
 
-    public static final String SIGN_EQUALS = "=";
-    public static final String SIGN_LESS_THAN = "<";
-    public static final String SIGN_GREATER_THAN = ">";
-    public static final String SIGN_LESS_EQUALS_THAN = "<=";
-    public static final String SIGN_GREATER_EQUALS_THAN =">=";
-    public static final String ORDER_ASC = "asc";
-    public static final String ORDER_DESC = "desc";
+```java
+public static final String SIGN_EQUALS = "=";
+public static final String SIGN_LESS_THAN = "<";
+public static final String SIGN_GREATER_THAN = ">";
+public static final String SIGN_LESS_EQUALS_THAN = "<=";
+public static final String SIGN_GREATER_EQUALS_THAN =">=";
+public static final String ORDER_ASC = "asc";
+public static final String ORDER_DESC = "desc";
 
-    private String[] getDefaultSigns(int length){
-        String[] signs = new String[length];
-        for(int i=0; i<length; i++){
-            signs[i] = SIGN_EQUALS;
-        }
-        return signs;
+private String[] getDefaultSigns(int length){
+    String[] signs = new String[length];
+    for(int i=0; i<length; i++){
+        signs[i] = SIGN_EQUALS;
     }
+    return signs;
+}
+```
 
 
 3.有了以上的基础，我们可以顺势写出好多`findBy`方法出来。
 
-    public List<T> findBy(String[] columns, Object[] values, String[] signs, int pageNo, String orderBy, String order){
-        return find(getHQLString(columns, signs, orderBy, order), values, pageNo);
-    }
-    
-    public List<T> findBy(String[] columns, Object[] values, String[] signs, int pageNo){
-        return find(getHQLString(columns, signs, null, null), values, pageNo);
-    }
-    
-    public List<T> findBy(String[] columns, Object[] values, int pageNo, String orderBy, String order){
-        String[] signs = getDefaultSigns(columns.length);
-        return find(getHQLString(columns, signs, orderBy, order), values, pageNo);
-    }
-    
-    public List<T> findBy(String[] columns, Object[] values, int pageNo){
-        String[] signs = getDefaultSigns(columns.length);
-        return find(getHQLString(columns, signs, null, null), values, pageNo);
-    }
-    
-    public List<T> findBy(String column, Object value, int pageNo, String orderBy, String order){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_EQUALS}, orderBy, order), new Object[]{value}, pageNo);
-    }
-    
-    public List<T> findBy(String column, Object value, int pageNo){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_EQUALS}, null, null), new Object[]{value}, pageNo);
-    }
-    
-    public List<T> findLessThan(String column, Object value, int pageNo, String orderBy, String order){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_LESS_THAN}, orderBy, order), new Object[]{value}, pageNo);
-    }
-    
-    public List<T> findLessThan(String column, Object value, int pageNo){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_LESS_THAN}, null, null), new Object[]{value}, pageNo);
-    }
-    
-    public List<T> findGreaterThan(String column, Object value, int pageNo, String orderBy, String order){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_GREATER_THAN}, orderBy, order), new Object[]{value}, pageNo);
-    }
-    
-    public List<T> findGreaterThan(String column, Object value, int pageNo){
-        return find(getHQLString(new String[]{column}, new String[]{SIGN_GREATER_THAN}, null, null), new Object[]{value}, pageNo);
-    }
+```java
+public List<T> findBy(String[] columns, Object[] values, String[] signs, int pageNo, String orderBy, String order){
+    return find(getHQLString(columns, signs, orderBy, order), values, pageNo);
+}
+
+public List<T> findBy(String[] columns, Object[] values, String[] signs, int pageNo){
+    return find(getHQLString(columns, signs, null, null), values, pageNo);
+}
+
+public List<T> findBy(String[] columns, Object[] values, int pageNo, String orderBy, String order){
+    String[] signs = getDefaultSigns(columns.length);
+    return find(getHQLString(columns, signs, orderBy, order), values, pageNo);
+}
+
+public List<T> findBy(String[] columns, Object[] values, int pageNo){
+    String[] signs = getDefaultSigns(columns.length);
+    return find(getHQLString(columns, signs, null, null), values, pageNo);
+}
+
+public List<T> findBy(String column, Object value, int pageNo, String orderBy, String order){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_EQUALS}, orderBy, order), new Object[]{value}, pageNo);
+}
+
+public List<T> findBy(String column, Object value, int pageNo){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_EQUALS}, null, null), new Object[]{value}, pageNo);
+}
+
+public List<T> findLessThan(String column, Object value, int pageNo, String orderBy, String order){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_LESS_THAN}, orderBy, order), new Object[]{value}, pageNo);
+}
+
+public List<T> findLessThan(String column, Object value, int pageNo){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_LESS_THAN}, null, null), new Object[]{value}, pageNo);
+}
+
+public List<T> findGreaterThan(String column, Object value, int pageNo, String orderBy, String order){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_GREATER_THAN}, orderBy, order), new Object[]{value}, pageNo);
+}
+
+public List<T> findGreaterThan(String column, Object value, int pageNo){
+    return find(getHQLString(new String[]{column}, new String[]{SIGN_GREATER_THAN}, null, null), new Object[]{value}, pageNo);
+}
+```
     
 
 4.同理，我们还可以写出`findIn`方法。
 
-    private String getInHQLString(String column, int inLength, String orderBy, String order){
-        StringBuilder builder = new StringBuilder(column);
+```java
+private String getInHQLString(String column, int inLength, String orderBy, String order){
+    StringBuilder builder = new StringBuilder(column);
+    
+    if(inLength > 0){
+        builder.append(" in (");
         
-        if(inLength > 0){
-            builder.append(" in (");
-            
-            for(int i=0; i<inLength; i++){
-                builder.append("?");
-                if(i < inLength - 1){
-                    builder.append(",");
-                }
+        for(int i=0; i<inLength; i++){
+            builder.append("?");
+            if(i < inLength - 1){
+                builder.append(",");
             }
-            
-            builder.append(")");
         }
         
-        if(orderBy != null){
-            builder.append(" order by " + orderBy + " " + order);
-        }
-        return builder.toString();
-    }
-
-    public List<T> findIn(String column, Object[] values, int pageNo, String orderBy, String order){
-        return find(getInHQLString(column, values.length, orderBy, order), values, pageNo);
+        builder.append(")");
     }
     
-    public List<T> findIn(String column, Object[] values, int pageNo){
-        return find(getInHQLString(column, values.length, null, null), values, pageNo);
+    if(orderBy != null){
+        builder.append(" order by " + orderBy + " " + order);
     }
+    return builder.toString();
+}
+
+public List<T> findIn(String column, Object[] values, int pageNo, String orderBy, String order){
+    return find(getInHQLString(column, values.length, orderBy, order), values, pageNo);
+}
+
+public List<T> findIn(String column, Object[] values, int pageNo){
+    return find(getInHQLString(column, values.length, null, null), values, pageNo);
+}
+```
 
 当然我们还能写出`findIn`和`findBy`混合的方法，即部分字段用符号比较，而部分字段用`in`比较。还可以写一堆`count`方法，我们这里就不再罗列了。
 

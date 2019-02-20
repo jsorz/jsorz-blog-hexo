@@ -21,78 +21,82 @@ tags: [javascript, web组件]
 
 我们这里只做了国内的高校，比人人网少一层，先从简，定义了下面的元素。
 
-    <div class="school-box-wrapper">
-        <div class="school-box">
-            <div class="school-box-header">选择学校</div>
-            <div class="school-box-provinces">
-                <a href="javascript:void(0)" class="province-item" data-province="1">江苏</a>
-            </div>
-            <div class="school-box-schools">
-                <a href="javascript:void(0)" class="school-item" data-school="10284">南京大学</a>
-                <a href="javascript:void(0)" class="school-item" data-school="10286">东南大学</a>
-            </div> 
+```html
+<div class="school-box-wrapper">
+    <div class="school-box">
+        <div class="school-box-header">选择学校</div>
+        <div class="school-box-provinces">
+            <a href="javascript:void(0)" class="province-item" data-province="1">江苏</a>
         </div>
+        <div class="school-box-schools">
+            <a href="javascript:void(0)" class="school-item" data-school="10284">南京大学</a>
+            <a href="javascript:void(0)" class="school-item" data-school="10286">东南大学</a>
+        </div> 
     </div>
+</div>
+```
 
 我们通过自定义属性`data-xxx`来存储ID，这里的学校ID采用的是教育部标准的学校代码，而省份ID无实际含义。参照上面的图，写出了以下样式。
 
-    .school-box-wrapper{
-        margin: 10px 0;
-    }
-    .school-box{
-        background-color: white;
-        border: 1px solid #005EAC;
-        width: 650px;
-    }
-    .school-box-header{
-        background: #3777BC;
-        color: white;
-        font-size: 14px;
-        font-weight: bold;
-        padding: 5px 10px;
-    }
-    .school-box-provinces,
-    .school-box-schools{
-        border: 1px solid #C3C3C3;
-        margin: 5px 10px 10px 10px;
-    }
-    .school-box-schools{
-        height: 200px;
-        overflow-x: hidden;
-        overflow-y: auto;
-    }
+```css
+.school-box-wrapper{
+    margin: 10px 0;
+}
+.school-box{
+    background-color: white;
+    border: 1px solid #005EAC;
+    width: 650px;
+}
+.school-box-header{
+    background: #3777BC;
+    color: white;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 5px 10px;
+}
+.school-box-provinces,
+.school-box-schools{
+    border: 1px solid #C3C3C3;
+    margin: 5px 10px 10px 10px;
+}
+.school-box-schools{
+    height: 200px;
+    overflow-x: hidden;
+    overflow-y: auto;
+}
 
-    .school-box-provinces a,
-    .school-box-schools a{
-        color: #005EAC;
-        cursor: pointer;
-        display: inline-block;
-        font-size: 12px;
-        height: 18px;
-        line-height: 18px;
-        text-decoration: none;
-    }
-    .school-box-provinces a{
-        margin: 2px 5px;
-        padding: 1px;
-    }
-    .school-box-provinces a:hover{
-        text-decoration: underline;
-    }
-    .school-box-provinces a.chosen{
-        background-color: #005EAC;
-        color: white;
-    }
-    .school-box-schools a{
-        margin: 4px 12px;
-        overflow: hidden;
-        padding-left: 10px;
-        width: 160px;
-    }
-    .school-box-schools a:hover{
-        background-color: #005EAC;
-        color: white;
-    }
+.school-box-provinces a,
+.school-box-schools a{
+    color: #005EAC;
+    cursor: pointer;
+    display: inline-block;
+    font-size: 12px;
+    height: 18px;
+    line-height: 18px;
+    text-decoration: none;
+}
+.school-box-provinces a{
+    margin: 2px 5px;
+    padding: 1px;
+}
+.school-box-provinces a:hover{
+    text-decoration: underline;
+}
+.school-box-provinces a.chosen{
+    background-color: #005EAC;
+    color: white;
+}
+.school-box-schools a{
+    margin: 4px 12px;
+    overflow: hidden;
+    padding-left: 10px;
+    width: 160px;
+}
+.school-box-schools a:hover{
+    background-color: #005EAC;
+    color: white;
+}
+```
 
 大体效果如图，依样画葫芦还凑合吧。
 
@@ -106,18 +110,20 @@ tags: [javascript, web组件]
 -------------
 上面的demo中学校是hard code到元素中的，但实际上不可能这样做。我们需要定义school的数据格式。
 
-    [
-        {
-            "id": 1,
-            "name": "北京",
-            "school": [
-                {
-                    "id": 10001,
-                    "name": "北京大学"
-                }
-            ]
-        }
-    ]
+```js
+[
+    {
+        "id": 1,
+        "name": "北京",
+        "school": [
+            {
+                "id": 10001,
+                "name": "北京大学"
+            }
+        ]
+    }
+]
+```
 
 于是我们将抓来的所有学校数据生成一个JSON对象放在全局中。[学校列表.js](/demo/SchoolBox/v2/school-list.js)
 
@@ -127,144 +133,162 @@ tags: [javascript, web组件]
 ---------------
 首先定义目标元素，province和school区域的父元素，以及province和school元素的copy（省得动态生成元素时写HTML了）。
 
-    var $provinceDiv = $('.school-box-provinces');
-    var $schoolDiv = $('.school-box-schools');
+```js
+var $provinceDiv = $('.school-box-provinces');
+var $schoolDiv = $('.school-box-schools');
 
-    var $provinceCopy = $('<a href="javascript:void(0)" class="province-item"></a>');
-    var $schoolCopy = $('<a href="javascript:void(0)" class="school-item"></a>');
+var $provinceCopy = $('<a href="javascript:void(0)" class="province-item"></a>');
+var $schoolCopy = $('<a href="javascript:void(0)" class="school-item"></a>');
+```
 
 其次，要定义变量将当前选中的province存起来，我们再定义一个变量指向全局的`SCHOOL_LIST`。
 
-    var provinces = SCHOOL_LIST;
-    var curProvince = -1;  //province id
+```js
+var provinces = SCHOOL_LIST;
+var curProvince = -1;  //province id
+```
 
 
 1.开始写初始化province区域的代码。
 
-    var initProvinces = function(){
-        for(var i=0; i<provinces.length; i++){
-            var province = provinces[i];
-            var $province = $provinceCopy.clone();
-            $province.attr('data-province', province['id'])
-                        .text(province['name']);
-            $provinceDiv.append($province);
-        }
-    };
+```js
+var initProvinces = function(){
+    for(var i=0; i<provinces.length; i++){
+        var province = provinces[i];
+        var $province = $provinceCopy.clone();
+        $province.attr('data-province', province['id'])
+                    .text(province['name']);
+        $provinceDiv.append($province);
+    }
+};
+```
 
 
 2.初始化学校，当然要根据传入的`provinceId`。
 
-    var getProvinceById = function(pid){
-        for(var i=0; i<provinces.length; i++){
-            // NOTE: 前置条件province id可以转成数字
-            if(Number(provinces[i]['id']) == Number(pid)){
-                return provinces[i];
-            }
+```js
+var getProvinceById = function(pid){
+    for(var i=0; i<provinces.length; i++){
+        // NOTE: 前置条件province id可以转成数字
+        if(Number(provinces[i]['id']) == Number(pid)){
+            return provinces[i];
         }
-        return undefined;
-    };
+    }
+    return undefined;
+};
 
-    var initSchools = function(provinceId){
-        var province = getProvinceById(provinceId);
-        if(typeof province !== 'undefined'){
-            var schools = province['school'];
-            $schoolDiv.empty();
+var initSchools = function(provinceId){
+    var province = getProvinceById(provinceId);
+    if(typeof province !== 'undefined'){
+        var schools = province['school'];
+        $schoolDiv.empty();
 
-            for(var i=0; i<schools.length; i++){
-                var school = schools[i];
-                var $school = $schoolCopy.clone();
-                $school.attr('data-school', school['id'])
-                        .text(school['name']);
-                $schoolDiv.append($school);
-            }
+        for(var i=0; i<schools.length; i++){
+            var school = schools[i];
+            var $school = $schoolCopy.clone();
+            $school.attr('data-school', school['id'])
+                    .text(school['name']);
+            $schoolDiv.append($school);
         }
-        return false;
-    };
+    }
+    return false;
+};
+```
 
 
 3.为province绑定`click`事件，这样就能级联起来。
 
-    var onProvinceClick = function(){
-        var pid = $(this).attr('data-province');
+```js
+var onProvinceClick = function(){
+    var pid = $(this).attr('data-province');
 
-        if(curProvince != pid){
-            // set chosen
-            $provinceDiv.find('a[data-province="' + curProvince + '"]').removeClass('chosen');
-            $provinceDiv.find('a[data-province="' + pid + '"]').addClass('chosen');
-            // update
-            curProvince = pid;
-            initSchools(pid);
-        }
-    };
+    if(curProvince != pid){
+        // set chosen
+        $provinceDiv.find('a[data-province="' + curProvince + '"]').removeClass('chosen');
+        $provinceDiv.find('a[data-province="' + pid + '"]').addClass('chosen');
+        // update
+        curProvince = pid;
+        initSchools(pid);
+    }
+};
+```
 
 
 4.同样为school添加`click`，还需要定义两个表单里的元素。
 
-    var $schoolInput = $('#schoolInput');
-    var $schoolId = $('#schoolId');
+```js
+var $schoolInput = $('#schoolInput');
+var $schoolId = $('#schoolId');
 
-    var onSchoolClick = function(){
-        $schoolInput.val($(this).text());
-        $schoolId.val($(this).attr('data-school'));
-    };
+var onSchoolClick = function(){
+    $schoolInput.val($(this).text());
+    $schoolId.val($(this).attr('data-school'));
+};
+```
 
 
 5.添加动画以及统一初始化方法
 
-    var $schoolBox = $('.school-box-wrapper');
-    var $schoolBoxLink = $('#openSchoolBoxLink');
+```js
+var $schoolBox = $('.school-box-wrapper');
+var $schoolBoxLink = $('#openSchoolBoxLink');
 
-    var hideSchoolBox = function(){
-        $schoolBox.slideUp();
-        $schoolBoxLink.show();
-    };
+var hideSchoolBox = function(){
+    $schoolBox.slideUp();
+    $schoolBoxLink.show();
+};
 
-    var showSchoolBox = function(){
-        $schoolBox.slideDown();
-        $schoolBoxLink.hide();
-    };
+var showSchoolBox = function(){
+    $schoolBox.slideDown();
+    $schoolBoxLink.hide();
+};
 
-    var init = function(){
-        initProvinces();
-        // bind events
-        $provinceDiv.find('a').click(onProvinceClick);
-        // 由于school元素是动态改变的，这里一定要通过live去绑定
-        $schoolDiv.find('a').live('click', onSchoolClick);
-        $schoolBoxLink.click(showSchoolBox);
-        // execute
-        showSchoolBox();
-    };
+var init = function(){
+    initProvinces();
+    // bind events
+    $provinceDiv.find('a').click(onProvinceClick);
+    // 由于school元素是动态改变的，这里一定要通过live去绑定
+    $schoolDiv.find('a').live('click', onSchoolClick);
+    $schoolBoxLink.click(showSchoolBox);
+    // execute
+    showSchoolBox();
+};
+```
 
 
 6.最后为了避免变量作用域的污染，我们定义一个自执行函数，去包裹以上所有js代码。
 
-    (function(){
-        // 以上省略...
+```js
+(function(){
+    // 以上省略...
 
-        // 执行初始化
-        return init();
-    })();
+    // 执行初始化
+    return init();
+})();
+```
 
 
 7.添加下点缀，让它每次`showSchoolBox`时都能自定选中前一次选择的province。
 
-    var lastProvinceIndex = 0;  //最后一次点击的index，用于初始化选中
+```js
+var lastProvinceIndex = 0;  //最后一次点击的index，用于初始化选中
 
-    var onProvinceClick = function(){
-        lastProvinceIndex = $(this).index();
+var onProvinceClick = function(){
+    lastProvinceIndex = $(this).index();
 
-        // 中间省略...
+    // 中间省略...
 
-        // 滚动条置顶
-        $schoolDiv.scrollTop(0);
-    };
+    // 滚动条置顶
+    $schoolDiv.scrollTop(0);
+};
 
-    var showSchoolBox = function(){
-        // 以上省略...
+var showSchoolBox = function(){
+    // 以上省略...
 
-        // 默认选中最后一次点击的province
-        $provinceDiv.find('a').eq(lastProvinceIndex).click();
-    };
+    // 默认选中最后一次点击的province
+    $provinceDiv.find('a').eq(lastProvinceIndex).click();
+};
+```
 
 [学校选择器v2 Demo](/demo/SchoolBox/v2/demo.html)
 

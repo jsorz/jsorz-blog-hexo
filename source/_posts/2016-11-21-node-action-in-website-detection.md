@@ -14,21 +14,29 @@ Node起步
 安装
 
 - nvm
-	
-		curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.2/install.sh | bash
+
+    ```bash
+    curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.25.2/install.sh | bash
+    ```
 
 - node 0.12.x
 
-		nvm install 0.12
+    ```bash
+    nvm install 0.12
+    ```
 
 - cnpm 镜像
 
-		npm install --registry=http://r.cnpmjs.org -g cnpm
+    ```bash
+    npm install --registry=http://r.cnpmjs.org -g cnpm
+    ```
 
 - debug 工具
 
-		cnpm install -g node-inspector
-		node-debug yourApp.js
+    ```bash
+    cnpm install -g node-inspector
+    node-debug yourApp.js
+    ```
 
 教程
 

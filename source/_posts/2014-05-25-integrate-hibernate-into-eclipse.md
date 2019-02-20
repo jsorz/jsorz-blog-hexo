@@ -63,23 +63,25 @@ HibernateTool安装完成后，可在eclipse中添加Hibernate perspective。
 
 在project的src根下添加名为hibernate.cfg.xml的文件，内容如下
 
-    <?xml version="1.0" encoding="UTF-8"?>
-    <!DOCTYPE hibernate-configuration PUBLIC
-            "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
-            "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
-    <hibernate-configuration>
-        <session-factory>
-            <property name="hibernate.connection.driver_class">org.gjt.mm.mysql.Driver</property>
-            <property name="hibernate.connection.password">123123</property>
-            <!-- 指定数据库对应的schema（我用的是mysql） -->
-            <property name="hibernate.connection.url">jdbc:mysql://localhost/factory_manage</property>
-            <property name="hibernate.connection.username">root</property>
-            <property name="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
-            <!-- 下面这句很重要 -->
-            <property name="current_session_context_class">thread</property>
-            <!-- 下面为表的mapping项（已省略） -->
-        </session-factory>
-    </hibernate-configuration>
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-configuration PUBLIC
+        "-//Hibernate/Hibernate Configuration DTD 3.0//EN"
+        "http://hibernate.sourceforge.net/hibernate-configuration-3.0.dtd">
+<hibernate-configuration>
+    <session-factory>
+        <property name="hibernate.connection.driver_class">org.gjt.mm.mysql.Driver</property>
+        <property name="hibernate.connection.password">123123</property>
+        <!-- 指定数据库对应的schema（我用的是mysql） -->
+        <property name="hibernate.connection.url">jdbc:mysql://localhost/factory_manage</property>
+        <property name="hibernate.connection.username">root</property>
+        <property name="hibernate.dialect">org.hibernate.dialect.MySQLInnoDBDialect</property>
+        <!-- 下面这句很重要 -->
+        <property name="current_session_context_class">thread</property>
+        <!-- 下面为表的mapping项（已省略） -->
+    </session-factory>
+</hibernate-configuration>
+```
 
 
 **步骤3**
@@ -127,159 +129,163 @@ Hibernate Session Factory
 --------------------------
 创建一个hibernate的package，新建HibernateSessionFactory.java，内容如下。
 
-    package hibernate;
+```java
+package hibernate;
 
-    import org.hibernate.HibernateException;
-    import org.hibernate.Session;
-    import org.hibernate.cfg.Configuration;
+import org.hibernate.HibernateException;
+import org.hibernate.Session;
+import org.hibernate.cfg.Configuration;
+
+/**
+ * Configures and provides access to Hibernate sessions, tied to the
+ * current thread of execution.  Follows the Thread Local Session
+ * pattern, see {@link http://hibernate.org/42.html }.
+ */
+public class HibernateSessionFactory {
+
+    /** 
+     * Location of hibernate.cfg.xml file.
+     * Location should be on the classpath as Hibernate uses  
+     * #resourceAsStream style lookup for its configuration file. 
+     * The default classpath location of the hibernate config file is 
+     * in the default package. Use #setConfigFile() to update 
+     * the location of the configuration file for the current session.   
+     */
+    private static String CONFIG_FILE_LOCATION = "/hibernate.cfg.xml";
+    private static final ThreadLocal<Session> threadLocal = new ThreadLocal<Session>();
+    private  static Configuration configuration = new Configuration();    
+    private static org.hibernate.SessionFactory sessionFactory;
+    private static String configFile = CONFIG_FILE_LOCATION;
+
+    static {
+        try {
+            configuration.configure(configFile);
+            sessionFactory = configuration.buildSessionFactory();
+        } catch (Exception e) {
+            System.err
+                    .println("%%%% Error Creating SessionFactory %%%%");
+            e.printStackTrace();
+        }
+    }
+    private HibernateSessionFactory() {
+    }
+    
+    /**
+     * Returns the ThreadLocal Session instance.  Lazy initialize
+     * the <code>SessionFactory</code> if needed.
+     *
+     *  @return Session
+     *  @throws HibernateException
+     */
+    public static Session getSession() throws HibernateException {
+        Session session = (Session) threadLocal.get();
+
+        if (session == null || !session.isOpen()) {
+            if (sessionFactory == null) {
+                rebuildSessionFactory();
+            }
+            session = (sessionFactory != null) ? sessionFactory.openSession()
+                    : null;
+            threadLocal.set(session);
+        }
+
+        return session;
+    }
 
     /**
-     * Configures and provides access to Hibernate sessions, tied to the
-     * current thread of execution.  Follows the Thread Local Session
-     * pattern, see {@link http://hibernate.org/42.html }.
+     *  Rebuild hibernate session factory
+     *
      */
-    public class HibernateSessionFactory {
-
-        /** 
-         * Location of hibernate.cfg.xml file.
-         * Location should be on the classpath as Hibernate uses  
-         * #resourceAsStream style lookup for its configuration file. 
-         * The default classpath location of the hibernate config file is 
-         * in the default package. Use #setConfigFile() to update 
-         * the location of the configuration file for the current session.   
-         */
-        private static String CONFIG_FILE_LOCATION = "/hibernate.cfg.xml";
-        private static final ThreadLocal<Session> threadLocal = new ThreadLocal<Session>();
-        private  static Configuration configuration = new Configuration();    
-        private static org.hibernate.SessionFactory sessionFactory;
-        private static String configFile = CONFIG_FILE_LOCATION;
-
-        static {
-            try {
-                configuration.configure(configFile);
-                sessionFactory = configuration.buildSessionFactory();
-            } catch (Exception e) {
-                System.err
-                        .println("%%%% Error Creating SessionFactory %%%%");
-                e.printStackTrace();
-            }
+    public static void rebuildSessionFactory() {
+        try {
+            configuration.configure(configFile);
+            sessionFactory = configuration.buildSessionFactory();
+        } catch (Exception e) {
+            System.err
+                    .println("%%%% Error Creating SessionFactory %%%%");
+            e.printStackTrace();
         }
-        private HibernateSessionFactory() {
-        }
-        
-        /**
-         * Returns the ThreadLocal Session instance.  Lazy initialize
-         * the <code>SessionFactory</code> if needed.
-         *
-         *  @return Session
-         *  @throws HibernateException
-         */
-        public static Session getSession() throws HibernateException {
-            Session session = (Session) threadLocal.get();
-
-            if (session == null || !session.isOpen()) {
-                if (sessionFactory == null) {
-                    rebuildSessionFactory();
-                }
-                session = (sessionFactory != null) ? sessionFactory.openSession()
-                        : null;
-                threadLocal.set(session);
-            }
-
-            return session;
-        }
-
-        /**
-         *  Rebuild hibernate session factory
-         *
-         */
-        public static void rebuildSessionFactory() {
-            try {
-                configuration.configure(configFile);
-                sessionFactory = configuration.buildSessionFactory();
-            } catch (Exception e) {
-                System.err
-                        .println("%%%% Error Creating SessionFactory %%%%");
-                e.printStackTrace();
-            }
-        }
-
-        /**
-         *  Close the single hibernate session instance.
-         *
-         *  @throws HibernateException
-         */
-        public static void closeSession() throws HibernateException {
-            Session session = (Session) threadLocal.get();
-            threadLocal.set(null);
-
-            if (session != null) {
-                session.close();
-            }
-        }
-
-        /**
-         *  return session factory
-         *
-         */
-        public static org.hibernate.SessionFactory getSessionFactory() {
-            return sessionFactory;
-        }
-
-        /**
-         *  return session factory
-         *
-         *  session factory will be rebuilded in the next call
-         */
-        public static void setConfigFile(String configFile) {
-            HibernateSessionFactory.configFile = configFile;
-            sessionFactory = null;
-        }
-
-        /**
-         *  return hibernate configuration
-         *
-         */
-        public static Configuration getConfiguration() {
-            return configuration;
-        }
-
     }
+
+    /**
+     *  Close the single hibernate session instance.
+     *
+     *  @throws HibernateException
+     */
+    public static void closeSession() throws HibernateException {
+        Session session = (Session) threadLocal.get();
+        threadLocal.set(null);
+
+        if (session != null) {
+            session.close();
+        }
+    }
+
+    /**
+     *  return session factory
+     *
+     */
+    public static org.hibernate.SessionFactory getSessionFactory() {
+        return sessionFactory;
+    }
+
+    /**
+     *  return session factory
+     *
+     *  session factory will be rebuilded in the next call
+     */
+    public static void setConfigFile(String configFile) {
+        HibernateSessionFactory.configFile = configFile;
+        sessionFactory = null;
+    }
+
+    /**
+     *  return hibernate configuration
+     *
+     */
+    public static Configuration getConfiguration() {
+        return configuration;
+    }
+
+}
+```
 
 注：这段代码是我以前在MyEclipse中用Hibernate时自动生成的，这里我不知道怎么生成，所以就直接复制了过来。
 
 同样，再新建一个HibernateSessionFactoryUtil.java，内容如下。
 
-    package hibernate.util;
+```java
+package hibernate.util;
 
-    import org.hibernate.SessionFactory;
-    import org.hibernate.cfg.Configuration;
+import org.hibernate.SessionFactory;
+import org.hibernate.cfg.Configuration;
 
-    public class HibernateSessionFactoryUtil {
+public class HibernateSessionFactoryUtil {
 
-        private static final SessionFactory sessionFactory;
-        
-        static
-        {
-            try {
-                sessionFactory = new Configuration().configure().buildSessionFactory();
-            } catch (Throwable e) {
-                /*
-                 * 需要捕获Throwable对象，
-                 * 否则捕获不到Error及其子类，以及NoClassDefFoundError类型的错误
-                 */
-                throw new ExceptionInInitializerError(e);
-            }
+    private static final SessionFactory sessionFactory;
+    
+    static
+    {
+        try {
+            sessionFactory = new Configuration().configure().buildSessionFactory();
+        } catch (Throwable e) {
+            /*
+             * 需要捕获Throwable对象，
+             * 否则捕获不到Error及其子类，以及NoClassDefFoundError类型的错误
+             */
+            throw new ExceptionInInitializerError(e);
         }
-        
-        private HibernateSessionFactoryUtil(){}
-        
-        public static SessionFactory getSessionFactory()
-        {
-            return sessionFactory;
-        }
-        
     }
+    
+    private HibernateSessionFactoryUtil(){}
+    
+    public static SessionFactory getSessionFactory()
+    {
+        return sessionFactory;
+    }
+    
+}
+```
 
 
 
@@ -287,238 +293,242 @@ DAO泛型编程
 ------------
 创建dao.interfaces的package，新建GenericDao.java，内容如下。
 
-    package dao.interfaces;
+```java
+package dao.interfaces;
 
-    import java.io.Serializable;
-    import java.util.ArrayList;
+import java.io.Serializable;
+import java.util.ArrayList;
 
-    public interface GenericDao<T, PK extends Serializable> {
+public interface GenericDao<T, PK extends Serializable> {
 
-        /**
-         * 根据主键取对象
-         * @param id 主键
-         * @return T 找不到时返回null
-         */
-        public T findById(PK id);
-        
-        
-        /**
-         * 取出表中所有对象
-         * @return ArrayList
-         */
-        public ArrayList<T> findAll();
-        
-        
-        /**
-         * 存一个完整对象，并返回主键
-         * @param entity 完整对象
-         * @return PK 主键
-         */
-        public PK save(T entity);
-        
-        
-        /**
-         * 更新一个对象，主键找不到时改为存一个对象
-         * @param entity 完整对象
-         * @return boolean
-         */
-        public boolean update(T entity);
-        
-        
-        /**
-         * 删除一个完整对象
-         * @param entity 完整对象
-         * @return boolean
-         */
-        public boolean delete(T entity);
-        
-        
-        /**
-         * 根据主键删除一个对象
-         * @param id 主键
-         * @return boolean
-         */
-        public boolean delete(PK id);
-        
-    }
+    /**
+     * 根据主键取对象
+     * @param id 主键
+     * @return T 找不到时返回null
+     */
+    public T findById(PK id);
+    
+    
+    /**
+     * 取出表中所有对象
+     * @return ArrayList
+     */
+    public ArrayList<T> findAll();
+    
+    
+    /**
+     * 存一个完整对象，并返回主键
+     * @param entity 完整对象
+     * @return PK 主键
+     */
+    public PK save(T entity);
+    
+    
+    /**
+     * 更新一个对象，主键找不到时改为存一个对象
+     * @param entity 完整对象
+     * @return boolean
+     */
+    public boolean update(T entity);
+    
+    
+    /**
+     * 删除一个完整对象
+     * @param entity 完整对象
+     * @return boolean
+     */
+    public boolean delete(T entity);
+    
+    
+    /**
+     * 根据主键删除一个对象
+     * @param id 主键
+     * @return boolean
+     */
+    public boolean delete(PK id);
+    
+}
+```
 
 相应地，创建dao.hibernate的package，新建GenericDaoHibernate.java，内容如下。
 
-    package dao.hibernate;
+```java
+package dao.hibernate;
 
-    import java.io.Serializable;
-    import java.lang.reflect.ParameterizedType;
-    import java.util.ArrayList;
+import java.io.Serializable;
+import java.lang.reflect.ParameterizedType;
+import java.util.ArrayList;
 
-    import org.hibernate.Query;
-    import org.hibernate.Session;
-    import org.hibernate.Transaction;
+import org.hibernate.Query;
+import org.hibernate.Session;
+import org.hibernate.Transaction;
 
-    import dao.interfaces.GenericDao;
-    import hibernate.util.HibernateSessionFactoryUtil;
+import dao.interfaces.GenericDao;
+import hibernate.util.HibernateSessionFactoryUtil;
 
-    public abstract class GenericDaoHibernate<T, PK extends Serializable> implements GenericDao<T, PK> {
+public abstract class GenericDaoHibernate<T, PK extends Serializable> implements GenericDao<T, PK> {
 
-        private Class<T> clazz;
-        
-        public GenericDaoHibernate()
-        {
-            //反射获取T.class，实参类型
-            clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
-        }
-        
-        @Override
-        public T findById(PK id)
-        {
-            T entity = null;
-            
-            try {
-                Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
-                Transaction tx = session.beginTransaction();
-                
-                try {
-                    entity = (T) session.get(clazz, id);
-                    tx.commit();
-                    
-                } catch (Exception e) {
-                    tx.rollback();
-                    e.printStackTrace();
-                }
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-        
-            return entity;
-        }
-        
-        @Override
-        public ArrayList<T> findAll()
-        {
-            ArrayList<T> result = new ArrayList<T>();
-            
-            try {
-                Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
-                Transaction tx = session.beginTransaction();
-                
-                try {
-                    Query query = session.createQuery("from " + clazz.getName());
-                    result = new ArrayList<T>(query.list());
-                    tx.commit();
-                    
-                } catch (Exception e) {
-                    tx.rollback();
-                    e.printStackTrace();
-                }
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            
-            return result;
-        }
-        
-        @Override
-        public PK save(T entity)
-        {
-            //boolean result = false;
-            PK result = null;
-            
-            try {
-                Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
-                Transaction tx = session.beginTransaction();
-                
-                try {
-                    //result = true;
-                    result = (PK) session.save(entity);
-                    tx.commit();
-                    
-                } catch (Exception e) {
-                    tx.rollback();
-                    e.printStackTrace();
-                }
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-        
-        @Override
-        public boolean update(T entity)
-        {
-            boolean result = false;
-            
-            try {
-                Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
-                Transaction tx = session.beginTransaction();
-                
-                try {           
-                    session.saveOrUpdate(entity);
-                    result = true;
-                    tx.commit();
-                    
-                } catch (Exception e) {
-                    tx.rollback();
-                    e.printStackTrace();
-                }
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-        
-        @Override
-        public boolean delete(T entity)
-        {
-            boolean result = false;
-            
-            try {
-                Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
-                Transaction tx = session.beginTransaction();
-                
-                try {
-                    session.delete(entity);
-                    result = true;
-                    tx.commit();
-                    
-                } catch (Exception e) {
-                    tx.rollback();
-                    e.printStackTrace();
-                }
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-
-            return result;
-        }
-        
-        @Override
-        /**
-         * 此法不好，暂时这样
-         */
-        public boolean delete(PK id)
-        {
-            boolean result = false;
-            
-            try {
-                T entity = findById(id);
-                
-                if(entity!=null && delete(entity)==true)
-                    result = true;
-                
-            } catch (Exception e) {
-                e.printStackTrace();
-            }
-            
-            return result;
-        }
-        
+    private Class<T> clazz;
+    
+    public GenericDaoHibernate()
+    {
+        //反射获取T.class，实参类型
+        clazz = (Class<T>)((ParameterizedType)getClass().getGenericSuperclass()).getActualTypeArguments()[0];
     }
+    
+    @Override
+    public T findById(PK id)
+    {
+        T entity = null;
+        
+        try {
+            Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
+            Transaction tx = session.beginTransaction();
+            
+            try {
+                entity = (T) session.get(clazz, id);
+                tx.commit();
+                
+            } catch (Exception e) {
+                tx.rollback();
+                e.printStackTrace();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    
+        return entity;
+    }
+    
+    @Override
+    public ArrayList<T> findAll()
+    {
+        ArrayList<T> result = new ArrayList<T>();
+        
+        try {
+            Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
+            Transaction tx = session.beginTransaction();
+            
+            try {
+                Query query = session.createQuery("from " + clazz.getName());
+                result = new ArrayList<T>(query.list());
+                tx.commit();
+                
+            } catch (Exception e) {
+                tx.rollback();
+                e.printStackTrace();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+    
+    @Override
+    public PK save(T entity)
+    {
+        //boolean result = false;
+        PK result = null;
+        
+        try {
+            Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
+            Transaction tx = session.beginTransaction();
+            
+            try {
+                //result = true;
+                result = (PK) session.save(entity);
+                tx.commit();
+                
+            } catch (Exception e) {
+                tx.rollback();
+                e.printStackTrace();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    @Override
+    public boolean update(T entity)
+    {
+        boolean result = false;
+        
+        try {
+            Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
+            Transaction tx = session.beginTransaction();
+            
+            try {           
+                session.saveOrUpdate(entity);
+                result = true;
+                tx.commit();
+                
+            } catch (Exception e) {
+                tx.rollback();
+                e.printStackTrace();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    @Override
+    public boolean delete(T entity)
+    {
+        boolean result = false;
+        
+        try {
+            Session session = HibernateSessionFactoryUtil.getSessionFactory().getCurrentSession();
+            Transaction tx = session.beginTransaction();
+            
+            try {
+                session.delete(entity);
+                result = true;
+                tx.commit();
+                
+            } catch (Exception e) {
+                tx.rollback();
+                e.printStackTrace();
+            }
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+
+        return result;
+    }
+    
+    @Override
+    /**
+     * 此法不好，暂时这样
+     */
+    public boolean delete(PK id)
+    {
+        boolean result = false;
+        
+        try {
+            T entity = findById(id);
+            
+            if(entity!=null && delete(entity)==true)
+                result = true;
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return result;
+    }
+    
+}
+```
 
 有了GenericDao的基础，对于其他具体实体类，我们只需要定义一个它的接口类去继承GenericDao，像这样
 

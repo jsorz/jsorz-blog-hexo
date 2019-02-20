@@ -14,11 +14,13 @@ tags: [javascript, 读书笔记]
 
 example.
 
-	//使用字面量
-	var car = {goes: 'far'};
-	//使用内置构造函数（反模式）
-	var car = new Object();
-	car.goes = 'far';
+```js
+//使用字面量
+var car = {goes: 'far'};
+//使用内置构造函数（反模式）
+var car = new Object();
+car.goes = 'far';
+```
 
 优先选择字面量模式创建对象的另一个原因在于它强调了该对象仅是一个可变哈希映射，而不是从对象中提取的属性或方法。
 与使用`Object`构造函数相对，使用字面量的另一个原因在于它并没有作用域解析。因为可能以同样的名字创建了一个局部构造函数，解释器需要从调用`Object()`的位置开始一直向上查询作用域链，直到发现全局`Object`构造函数。
@@ -29,12 +31,14 @@ example.
 自定义构造函数
 ----------------
 
-	var Person = function(name){
-		this.name = name;
-		this.say = function(){
-		return 'I am ' + this.name;
-		};
+```js
+var Person = function(name){
+	this.name = name;
+	this.say = function(){
+	return 'I am ' + this.name;
 	};
+};
+```
 
 当以`new`操作符调用构造函数时，函数内部将会发生以下情况：
 1. 创建一个空对象并且`this`变量引用了该对象，同时还继承了该函数的原型。
@@ -43,22 +47,26 @@ example.
 
 以上情况看起来就像是在后台发生了如下事情：
 
-	var Person = function(name){
-		//使用对象字面量创建一个新对象
-		//var this = {};
-		//向this添加属性和方法
-		this.name = name;
-		this.say = function(){
-			return 'I am ' + this.name;
-		};
-		//return this;
+```js
+var Person = function(name){
+	//使用对象字面量创建一个新对象
+	//var this = {};
+	//向this添加属性和方法
+	this.name = name;
+	this.say = function(){
+		return 'I am ' + this.name;
 	};
+	//return this;
+};
+```
 
 在本例中，将`say()`方法添加到`this`中，其造成的结果是在任何时候调用`new Person()`时都会在内存中创建一个新的函数。这种方法显然是低效的，因为多个实例之间的`say()`方法实际上并没有改变。更好的选择应该是将方法添加到`Person`类的原型中。可重用的成员，比如可重用的方法，都应该放置到对象的原型中。
 
 本例中，`var this = {};`并不是真相的全部，因为“空”对象实际上并不空，它已经从`Person`的原型中继承了许多成员。因此，它更像是下面的语句：
 
-	var this = Object.create(Person.prototype);
+```js
+var this = Object.create(Person.prototype);
+```
 
 注意，构造函数将隐式地返回`this`，甚至于在函数中没有显式地加入`return`语句。但是，可以根据需要返回任意其他对象。
 
@@ -69,23 +77,27 @@ example.
 
 example.
 
-	function Waffle(){
-		this.tastes = 'yummy';
-	}
-	//反模式：忘记使用new操作符
-	var mm = Waffle();
-	console.log(typeof mm);  //output: undefined
-	console.log(window.tastes);  //output: yummy
+```js
+function Waffle(){
+	this.tastes = 'yummy';
+}
+//反模式：忘记使用new操作符
+var mm = Waffle();
+console.log(typeof mm);  //output: undefined
+console.log(window.tastes);  //output: yummy
+```
 
 上面的这种意外行为在ECMAScript 5中得到了解决，并且在strict模式中，`this`不会指向全局对象。
 
 **方案1：使用that**
 
-	function Waffle(){
-		var that = {};
-		that.tastes = 'yummy';
-		return that;
-	}
+```js
+function Waffle(){
+	var that = {};
+	that.tastes = 'yummy';
+	return that;
+}
+```
 
 这种模式的问题在于它会丢失到原型的链接，因此任何添加到`Waffle()`原型的成员，对于对象来说都是不可用的。
 
@@ -95,26 +107,30 @@ example.
 
 example.
 
-	function Waffle(){
-		if(!(this instanceof Waffle)){
-			return new Waffle();
-		}
-		this.tastes = 'yummy';
+```js
+function Waffle(){
+	if(!(this instanceof Waffle)){
+		return new Waffle();
 	}
-	Waffle.prototype.wantAnother = true;
+	this.tastes = 'yummy';
+}
+Waffle.prototype.wantAnother = true;
 
-	var first = new Waffle();
-	var second = Waffle();
-	console.log(first.tastes);  //output: yummy
-	console.log(second.tastes);  //output: yummy
-	console.log(first.wantAnother);  //output: true
-	console.log(second.wantAnother);  //output: true
+var first = new Waffle();
+var second = Waffle();
+console.log(first.tastes);  //output: yummy
+console.log(second.tastes);  //output: yummy
+console.log(first.wantAnother);  //output: true
+console.log(second.wantAnother);  //output: true
+```
 
 另一种用于检测实例对象的通用方法是将其与`arguments.callee`进行比较，而不是在代码中硬编码构造函数名称。
 
-	if(!(this instanceof arguments.callee)){
-		return new arguments.callee();
-	}
+```js
+if(!(this instanceof arguments.callee)){
+	return new arguments.callee();
+}
+```
 
 注：在ES5的strict模式中并不支持`arguments.callee`属性。
 

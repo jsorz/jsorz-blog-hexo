@@ -49,28 +49,32 @@ tap是怎么来的
 
 整个容器里有一个底层元素的div，和一个弹出层div，为了让弹出层有模态框的效果，我又加了一个遮罩层。
 
-	<div class="container">
-		<div id="underLayer">底层元素</div>
+```html
+<div class="container">
+	<div id="underLayer">底层元素</div>
 
-		<div id="popupLayer">
-			<div class="layer-title">弹出层</div>
-			<div class="layer-action">
-				<button class="btn" id="closePopup">关闭</button>
-			</div>
+	<div id="popupLayer">
+		<div class="layer-title">弹出层</div>
+		<div class="layer-action">
+			<button class="btn" id="closePopup">关闭</button>
 		</div>
 	</div>
-	<div id="bgMask"></div>
+</div>
+<div id="bgMask"></div>
+```
 
 然后为底层元素绑定 click 事件，而弹出层的关闭按钮绑定 tap 事件。
 
-	$('#closePopup').on('tap', function(e){
-		$('#popupLayer').hide();
-		$('#bgMask').hide();
-	});
+```js
+$('#closePopup').on('tap', function(e){
+	$('#popupLayer').hide();
+	$('#bgMask').hide();
+});
 
-	$('#underLayer').on('click', function(){
-		alert('underLayer clicked');
-	});
+$('#underLayer').on('click', function(){
+	alert('underLayer clicked');
+});
+```
 
 点击关闭按钮，touchend首先触发tap，弹出层和遮罩就被隐藏了。touchend后继续等待300ms发现没有其他行为了，则继续触发click，由于这时弹出层已经消失，所以当前click事件的target就在底层元素上，于是就alert内容。整个事件触发过程为 touchend -> tap -> click。
 
@@ -114,23 +118,27 @@ tap是怎么来的
 
 因此解决“穿透”的办法就很简单，[demo如下](/demo/touch-event/solution2.html)
 
-	$('#closePopup').on('tap', function(e){
-		$('#popupLayer').hide();
-		$('#bgMask').hide();
+```js
+$('#closePopup').on('tap', function(e){
+	$('#popupLayer').hide();
+	$('#bgMask').hide();
 
-		$('#underLayer').css('pointer-events', 'none');
+	$('#underLayer').css('pointer-events', 'none');
 
-		setTimeout(function(){
-			$('#underLayer').css('pointer-events', 'auto');
-		}, 400);
-	});
+	setTimeout(function(){
+		$('#underLayer').css('pointer-events', 'auto');
+	}, 400);
+});
+```
 
 
 ### 3. fastclick ###
 
 使用[fastclick](https://github.com/ftlabs/fastclick)库，其实现思路是，取消 click 事件（[参看源码 164-173 行](https://github.com/ftlabs/fastclick/blob/master/lib/fastclick.js#L164-L173)），用 touchend 模拟快速点击行为（[参看源码 521-610 行](https://github.com/ftlabs/fastclick/blob/master/lib/fastclick.js#L521-L610)）。
 
-	FastClick.attach(document.body);
+```js
+FastClick.attach(document.body);
+```
 
 从此所有点击事件都使用`click`，不会出现“穿透”的问题，并且没有300ms的延迟。[解决穿透的demo](/demo/touch-event/solution3.html)
 

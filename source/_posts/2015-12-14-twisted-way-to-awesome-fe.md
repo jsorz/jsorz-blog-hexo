@@ -54,38 +54,42 @@ tags: [前端]
 --------
 还没了解js对类(或模块)的封装前，我们的代码可能是这样的
 
-    var getData = function(){
+```js
+var getData = function(){
+    // ......
+};
+
+function editFunc(){
+    // ......
+};
+
+$('.refresh-btn').on('click', function(){
+    var data = getData();
+    var $target = $($(this).attr('data-target'));
+    $target.empty();
+
+    for(var i=0; i<data.length; i++){
+        var $child = $('<tr></tr>');
+        $child.append('<td>' + data[i]['name'] + '</td>');
         // ......
-    };
+        $child.append('<td><a class="edit-link">编辑</a></td>');
+        $target.append($child);
+    }
 
-    function editFunc(){
-        // ......
-    };
-
-    $('.refresh-btn').on('click', function(){
-        var data = getData();
-        var $target = $($(this).attr('data-target'));
-        $target.empty();
-
-        for(var i=0; i<data.length; i++){
-            var $child = $('<tr></tr>');
-            $child.append('<td>' + data[i]['name'] + '</td>');
-            // ......
-            $child.append('<td><a class="edit-link">编辑</a></td>');
-            $target.append($child);
-        }
-
-        $target.find('.edit-link').on('click', editFunc);
-    });
+    $target.find('.edit-link').on('click', editFunc);
+});
+```
 
 一个点击就获取数据，然后刷新表格的功能。如果一个页面中有多个类似的异步刷新的表格，且每个表格的字段又各不相同，那么最偷懒的做法就是拷贝大段代码，然后再调整`<td>`的字段。这样的代码简直了，太难维护了！
 
-    var table1 = new AjaxTable({
-        el: '#dataTable',
-        dataUrl: '/path/to/action/'
-    });
+```js
+var table1 = new AjaxTable({
+    el: '#dataTable',
+    dataUrl: '/path/to/action/'
+});
 
-    table1.refresh();
+table1.refresh();
+```
 
 如果代码变成这样，那就爽多了，获取数据和刷新表格的过程都封在了`AjaxTable`中，各个使用之处只需要传个参数调用下`refresh()`即可，减少了大量重复(相似的)代码。这就是对UI组件/功能组件的封装。
 
@@ -104,10 +108,12 @@ tags: [前端]
 ---------
 如果要在页面上引入外部的js库，最初学习的时候是这样引入的
 
-    <script type="text/javascript" src="jquery-1.7.2.min.js"></script>
-    <script type="text/javascript" src="jquery-ui/jquery-ui-1.8.24.min.js"></script>
-    <script type="text/javascript" src="jquery-ui/jquery-ui-datepicker-zh-CN.js"></script>
-    <script type="text/javascript" src="bootstrap-2.3.2.min.js"></script>
+```html
+<script type="text/javascript" src="jquery-1.7.2.min.js"></script>
+<script type="text/javascript" src="jquery-ui/jquery-ui-1.8.24.min.js"></script>
+<script type="text/javascript" src="jquery-ui/jquery-ui-datepicker-zh-CN.js"></script>
+<script type="text/javascript" src="bootstrap-2.3.2.min.js"></script>
+```
 
 由于浏览器中js的执行(非加载)过程是在单线程中的，而各js文件又会存在依赖关系，比如 jquery-ui 依赖 jquery，bootstrap 也依赖 jquery，所以`<script>`标签的引入得满足依赖顺序。当一个项目越做页面越多时，这么多页面中会存在一堆`<script>`标签，如果要将某个js文件升级版本，或者修改script的依赖关系时，这就会成为一个很繁琐的工作，特别是`<script>`分散在项目的各个文件中时。
 
@@ -123,63 +129,69 @@ tags: [前端]
 --------
 *页面继承* 这块跟上面的各种具体的技术没太大关系，页面继承主要是用来组织项目文件结构（或页面结构）的一些经验规则。假设在一个系统里，每个页面都有相同的头和尾，还有nav，那根据上面封装和分离的思想，我们可能会这样写
 
-    <html>
-    <body>
-        %{ include header.html }%
+```html
+<html>
+<body>
+    %{ include header.html }%
 
-        <div class="container">
-            <div class="left">
-                %{ include nav.html }%
-            </div>
-            <div class="main">
-                <!-- 具体业务... -->
-            </div>
+    <div class="container">
+        <div class="left">
+            %{ include nav.html }%
         </div>
-        
-        %{ include footer.html }%
+        <div class="main">
+            <!-- 具体业务... -->
+        </div>
+    </div>
+    
+    %{ include footer.html }%
 
-        <script src="require.min.js"></script>
-        <script type="text/javascript">
-        requirejs.config({
-            // 全局配置...
-        });
-        </script>
+    <script src="require.min.js"></script>
+    <script type="text/javascript">
+    requirejs.config({
+        // 全局配置...
+    });
+    </script>
 
-        <script type="text/javascript">
-        require(['jquery'], function($){
-            // 具体业务...
-        });
-        </script>
-    </body>
-    </html>
+    <script type="text/javascript">
+    require(['jquery'], function($){
+        // 具体业务...
+    });
+    </script>
+</body>
+</html>
+```
 
 我们可以把这一段作为一个base的父页面，命名为`base.html`，每个“具体业务”的页面都继承自它。
 
-	%{ extends 'base.html' }%
-	
-	%{ block styles }%
-	<style type="text/css">
-	
-	</style>
-	%{ endblock }%
-	
-	%{ block content }%
-	<div>具体业务...</div>
-	%{ endblock }%
-	
-	%{ block scripts }%
-	<script type="text/javascript"
-	require(['jquery'], function($){
-        // 具体业务...
-    });
-	</script>
-	%{ endblock }%
+```html
+%{ extends 'base.html' }%
+
+%{ block styles }%
+<style type="text/css">
+
+</style>
+%{ endblock }%
+
+%{ block content }%
+<div>具体业务...</div>
+%{ endblock }%
+
+%{ block scripts }%
+<script type="text/javascript"
+require(['jquery'], function($){
+    // 具体业务...
+});
+</script>
+%{ endblock }%
+```
 
 把这个页面叫做`func1.html`，具体业务的页面中只会包含自身业务功能需要关心(用到)的东西，不去多管base页面的闲事。可以看到子页面中有很多`block`之类的锚点，会将与`endblock`之间的内容插入到父页面中的相应位置，所以要先在`base.html`中“挖好坑”。
 
-	%{ block styles }% %{ endblock }%
-	%{ block content }% %{ endblock }%
-	%{ block scripts }% %{ endblock }%
+```
+%{ block styles }% %{ endblock }%
+%{ block content }% %{ endblock }%
+%{ block scripts }% %{ endblock }%
+```
 
 具体做法可以去看常见的模板系统，本例中参考的是[Django](https://docs.djangoproject.com/en/1.9/ref/templates/language/)中的模板定义。
 
@@ -188,31 +200,33 @@ tags: [前端]
 ---------
 *页面组件化* 也是和具体技术没有关系，它是顺着 *页面继承* 的思路，把页面或文件结构做更小粒度的拆分，页面由一个个页面组件构成。
 
-    %{ include sectionA.css }%
-    %{ include sectionB.css }%
+```html
+%{ include sectionA.css }%
+%{ include sectionB.css }%
 
-    <div class="row">
-        %{ include sectionA.tpl }%
-    </div>
-    <div class="row">
-        %{ include sectionB.tpl }%
-    </div>
-    
-    <script type="text/javascript">
-    require(['sectionA', 'sectionB'], function(A, B){
-        var App = Base.extend({
-            _init: function(){
-                var that = this;
-                var mods = [A, B];
-                this.modules = [];
-                
-                mods.forEach(function(Module){
-                    that.modules.push(new Module(App));
-                });
-            }
-        });
+<div class="row">
+    %{ include sectionA.tpl }%
+</div>
+<div class="row">
+    %{ include sectionB.tpl }%
+</div>
+
+<script type="text/javascript">
+require(['sectionA', 'sectionB'], function(A, B){
+    var App = Base.extend({
+        _init: function(){
+            var that = this;
+            var mods = [A, B];
+            this.modules = [];
+            
+            mods.forEach(function(Module){
+                that.modules.push(new Module(App));
+            });
+        }
     });
-    </script>
+});
+</script>
+```
 
 上面相当于一个业务页面，它由`sectionA`和`sectionB`两个页面组件组成，`sectionA.tpl`和`sectionB.tpl`是html模板。在应用层(即业务)页面中初始化两个js模块`A`和`B`，并且把自身的`App`变量传递给模块（`new Module(App)`），可以实现子模块与应用层页面的通信，甚至是模块之间的通信。
 
@@ -220,9 +234,11 @@ tags: [前端]
 
 还看过一种思想是，把css文件也当做资源由requireJS动态加载，这样上面示例中的`include xxx.css`都不需要了，页面模块的css资源作为该模块的依赖，写在js模块的`define`的依赖中。
 
-	define(['jquery', 'sectionA.css'], function($){
-	    // 业务模块...
-	});
+```js
+define(['jquery', 'sectionA.css'], function($){
+    // 业务模块...
+});
+```
 
 这样把css和js都抽象成“资源”，相当于
 

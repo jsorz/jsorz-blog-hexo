@@ -70,26 +70,28 @@ tags: [css, 面试]
 
 还有一种也可以实现水平居中，父元素设relative定位，子元素设absolute定位，子元素left: 50%，margin-left等于负1/2的width即可。模态框的居中一般使用这种办法。
 
-    .mask{
-        background-color: #666;
-        height: 100%;
-        left: 0;
-        opacity: 0.3;
-        position: absolute;
-        top: 0;
-        width: 100%;
-        z-index: 99;
-    }
-    .modal{
-        background-color: #fff;
-        height: 300px;
-        left: 50%;
-        margin-left: -200px;
-        position: fixed;
-        top: 120px;
-        z-index: 100;
-        width: 400px;
-    }
+```css
+.mask{
+    background-color: #666;
+    height: 100%;
+    left: 0;
+    opacity: 0.3;
+    position: absolute;
+    top: 0;
+    width: 100%;
+    z-index: 99;
+}
+.modal{
+    background-color: #fff;
+    height: 300px;
+    left: 50%;
+    margin-left: -200px;
+    position: fixed;
+    top: 120px;
+    z-index: 100;
+    width: 400px;
+}
+```
 
 
 
@@ -134,18 +136,20 @@ float塌陷
 
 - clearfix法
 
-        .clearfix {
-            *zoom: 1;
-        }
-        .clearfix:before,
-        .clearfix:after {
-            display: table;
-            line-height: 0;
-            content: "";
-        }
-        .clearfix:after {
-            clear: both;
-        }
+```css
+.clearfix {
+    *zoom: 1;
+}
+.clearfix:before,
+.clearfix:after {
+    display: table;
+    line-height: 0;
+    content: "";
+}
+.clearfix:after {
+    clear: both;
+}
+```
 
 接着问：IE下加`*zoom: 1`就够了吗？
 

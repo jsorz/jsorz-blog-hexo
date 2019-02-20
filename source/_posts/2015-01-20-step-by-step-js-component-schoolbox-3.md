@@ -15,24 +15,26 @@ tags: [javascript, web组件]
 
 1.由于需要在对象外部监听/订阅事件，我们在`SchoolBox`的`prototype`中添加两个方法。
 
-    SchoolBox.prototype = {
-        // 以上省略...
+```js
+SchoolBox.prototype = {
+    // 以上省略...
 
-        on: function(type, handler){
-            if(typeof this.handlers[type] === 'undefined'){
-                this.handlers[type] = [];
-            }
-            this.handlers[type].push(handler);
-        },
-        fire: function(type, data){
-            if(this.handlers[type] instanceof Array){
-                var handlers = this.handlers[type];
-                for(var i=0, len=handlers.length; i<len; i++){
-                    handlers[i](data);
-                }
+    on: function(type, handler){
+        if(typeof this.handlers[type] === 'undefined'){
+            this.handlers[type] = [];
+        }
+        this.handlers[type].push(handler);
+    },
+    fire: function(type, data){
+        if(this.handlers[type] instanceof Array){
+            var handlers = this.handlers[type];
+            for(var i=0, len=handlers.length; i<len; i++){
+                handlers[i](data);
             }
         }
-    };
+    }
+};
+```
 
 `on`是用于监听的，供对象外部（应用层）使用。而`fire`用于触发事件，在对象内部使用。`handlers`是用来存储事件类型和回调函数的一个map，它的key就是事件类型，而value是一个数组，数组里面就是监听该事件类型的所有回调函数。
 
@@ -40,23 +42,27 @@ tags: [javascript, web组件]
 
 3.触发事件
 
-    $schoolDiv.find('a').live('click', function(event){
-        // 以上省略...
+```js
+$schoolDiv.find('a').live('click', function(event){
+    // 以上省略...
 
-        // 自定义事件回调
-        instance.fire('schoolChosen', {
-            schoolId: $(this).attr('data-school'),
-            schoolName: $(this).text()
-        });
+    // 自定义事件回调
+    instance.fire('schoolChosen', {
+        schoolId: $(this).attr('data-school'),
+        schoolName: $(this).text()
     });
+});
+```
 
 4.应用层监听事件
 
-    schoolBox.on('schoolChosen', function(data){
-        $schoolInput.val(data.schoolName);
-        $schoolId.val(data.schoolId);
-        $chooseBoxLink.show();
-    });
+```js
+schoolBox.on('schoolChosen', function(data){
+    $schoolInput.val(data.schoolName);
+    $schoolId.val(data.schoolId);
+    $chooseBoxLink.show();
+});
+```
 
 [学校选择器v4 Demo](/demo/SchoolBox/v4/demo.html)
 

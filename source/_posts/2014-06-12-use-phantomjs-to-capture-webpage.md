@@ -41,12 +41,14 @@ phantomjs
 
 一个最简单的demo
 
-    var page = require('webpage').create();
-    var url = 'http://www.baidu.com/';
-    page.open(url, function() {
-        page.render('baidu.png');
-        phantom.exit()
-    });
+```js
+var page = require('webpage').create();
+var url = 'http://www.baidu.com/';
+page.open(url, function() {
+    page.render('baidu.png');
+    phantom.exit()
+});
+```
 
 截图效果
 
@@ -60,45 +62,47 @@ casperjs
 
 多步访问截图demo
 
-    var casper = require('casper').create();
-    var url = 'http://www.baidu.com/';
+```js
+var casper = require('casper').create();
+var url = 'http://www.baidu.com/';
 
-    casper.start(url, function() {
-        // 填写表单（搜索关键字）
-        // 最后一个参数true表示submit
-        this.fill('form#form1', { wd: 'phantomjs' }, true);
-    });
+casper.start(url, function() {
+    // 填写表单（搜索关键字）
+    // 最后一个参数true表示submit
+    this.fill('form#form1', { wd: 'phantomjs' }, true);
+});
 
-    casper.then(function() {
-        this.viewport(1366, 768);
-        // 注意：这里要等待结果刷新，百度搜索结果是异步刷出来的
-        this.waitFor(function check(){
-            return this.evaluate(function(){
-                return document.querySelectorAll('#content_left').length > 0;
-            });
-        }, function then(){
-            this.captureSelector('phantomjs.png', 'body');
+casper.then(function() {
+    this.viewport(1366, 768);
+    // 注意：这里要等待结果刷新，百度搜索结果是异步刷出来的
+    this.waitFor(function check(){
+        return this.evaluate(function(){
+            return document.querySelectorAll('#content_left').length > 0;
         });
+    }, function then(){
+        this.captureSelector('phantomjs.png', 'body');
     });
+});
 
-    casper.then(function() {
-        // 填写表单（搜索关键字）
-        // 注意此时form id不同于之前
-        this.fill('form#form', { wd: 'casperjs' }, true);
-    });
+casper.then(function() {
+    // 填写表单（搜索关键字）
+    // 注意此时form id不同于之前
+    this.fill('form#form', { wd: 'casperjs' }, true);
+});
 
-    casper.then(function() {
-        this.viewport(1366, 768);
-        this.waitFor(function check(){
-            return this.evaluate(function(){
-                return document.querySelectorAll('#content_left').length > 0;
-            });
-        }, function then(){
-            this.captureSelector('casperjs.png', 'body');
+casper.then(function() {
+    this.viewport(1366, 768);
+    this.waitFor(function check(){
+        return this.evaluate(function(){
+            return document.querySelectorAll('#content_left').length > 0;
         });
+    }, function then(){
+        this.captureSelector('casperjs.png', 'body');
     });
+});
 
-    casper.run();
+casper.run();
+```
 
 截图效果
 
@@ -116,30 +120,32 @@ casperjs
 
 部分示例代码如下
 
-    // 省略……
-    // categories是功能的分类数组
-    // pages是对每个category下生成的合法url数组，即pages是url的二维数组
-    casper.then(function(){
-        for(var i=0; i<pages.length; i++){
-            (function(that, category, urls){
-                that.each(urls, function(self, link){
-                    var params = (link.split('?')[1]).split('&');
-                    // TODO: get params
+```js
+// 省略……
+// categories是功能的分类数组
+// pages是对每个category下生成的合法url数组，即pages是url的二维数组
+casper.then(function(){
+    for(var i=0; i<pages.length; i++){
+        (function(that, category, urls){
+            that.each(urls, function(self, link){
+                var params = (link.split('?')[1]).split('&');
+                // TODO: get params
 
-                    self.thenOpen(link, function(){
-                        self.waitFor(function check(){
-                            return self.evaluate(function(){
-                                // TODO: 异步加载的判断
-                                return true;
-                            });
-                        }, function then(){
-                            self.captureSelector(/from/to' + category + '/' + param + '.png', '#chart');
+                self.thenOpen(link, function(){
+                    self.waitFor(function check(){
+                        return self.evaluate(function(){
+                            // TODO: 异步加载的判断
+                            return true;
                         });
+                    }, function then(){
+                        self.captureSelector(/from/to' + category + '/' + param + '.png', '#chart');
                     });
                 });
-            })(this, categories[i], pages[i]);
-        }
-    });
+            });
+        })(this, categories[i], pages[i]);
+    }
+});
+```
 
 截图效果
 
