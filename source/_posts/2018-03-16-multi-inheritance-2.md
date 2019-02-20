@@ -18,7 +18,7 @@ tags: [javascript, es]
 
 多继承并没有想象的那么美好，首先是对 `instanceof` 提出了更高的要求
 
-```
+```js
 class A {}
 class B {}
 // 假定有支持多继承的语法
@@ -44,7 +44,7 @@ c instanceof B  // true
 
 先退而求其次，我们借鉴了 Java 中的思路，实际只继承一个类，通过其他方式将其他类的功能融入。Java 中可以用 `Interface` 约束一个类应该拥有的行为，当然 JavaScript 也可以这么做，实现 interface 的语法糖，检查“类”中有没有重写 interface 中的所有函数。但这样的话，interface 除了做校验之用，没有实际意义，不如直接 mixin 的方式来的实在。
 
-```
+```js
 const mixinClass = (base, ...mixins) => {
   const mixinProps = (target, source) => {
     Object.getOwnPropertyNames(source).forEach(prop => {
@@ -157,7 +157,7 @@ L(C) = C + merge(L(A), L(B), AB)
 - 同时引入 Method Resolution Order (MRO) 的C3算法，将每个“类”的 MRO 线性序列存在 meta 数据中
 - 将多继承中的第一个父类，使用原型链的方式继承，而剩下的父类则使用 mixin 的方式
 
-```
+```js
 const mixinProps = (target, source) => {
   Object.getOwnPropertyNames(source).forEach(prop => {
     if (/^(?:constructor|isInstanceOf)$/.test(prop)) { return; }
@@ -252,7 +252,7 @@ const createClass = (parents, props) => {
 
 接着来测试一下如图3中的多继承结构
 
-```
+```js
 const O = createClass(null, {});
 const X = createClass([O], {});
 const Y = createClass([O], {
@@ -294,7 +294,7 @@ console.log(obj.methodY());
 
 仔细看上面代码的话会发现，`c.testName()` 输出的与 Method Resolution Order 中所述的算法不符。在那一节中，我们知道 C 的 MRO 应该为 `C A X B Y O`，示例代码中按理来说应该优先调用 A 中的 `testName()` 函数，实际却输出了"B"......卧槽，这代码有毒的吧？？
 
-```
+```js
   // inherit first parent through proto chain
   if (superCls && typeof superCls === 'function') {
     Ctor.prototype = Object.create(superCls.prototype);

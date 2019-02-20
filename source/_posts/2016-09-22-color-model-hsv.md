@@ -87,7 +87,7 @@ HSL 和 HSV 很相似，它们都是面向用户的颜色模型，定义了：�
 
 **js 实现如下**
 
-```
+```js
 rgb2hsv: function () {
     // 读取 rgb
     var rgb = this.parseRgbArguments.apply(null, arguments);
@@ -168,7 +168,7 @@ rgb2hsv: function () {
 
 **js 实现如下**
 
-```
+```js
 hsv2rgb: function () {
     // 读取 hsv
     var hsv = this.parseHsvArguments.apply(null, arguments);

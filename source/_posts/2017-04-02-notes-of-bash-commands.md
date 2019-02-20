@@ -13,21 +13,21 @@ tags: [linux]
 
 seq
 
-```
+```bash
 seq 0 5
 seq -s
 ```
 
 bc
 
-```
+```bash
 echo 1+2 | bc
 echo '1+2' | bc
 ```
 
 求和
 
-```
+```bash
 seq -s '+' 100 | bc
 ```
 
@@ -78,7 +78,7 @@ shell 特点
 - 变量字符匹配：被匹配的，即是被删除的
     - `echo ${a##.*}`
 
-```
+```bash
 ${a}
 
 ${#a}   变量得长度
@@ -90,7 +90,7 @@ ${a##}  最大头匹配
 
 数组
 
-```
+```bash
 array=(a b c)
 ${a[0]}
 ${#a[0]}    第一个元素的长度
@@ -116,7 +116,7 @@ ${#a[@]}    数组的长度
 
 循环遍历
 
-```
+```bash
 #!/bin/bash
 ary=(a b c)
 for (( i=0; i<${#ary[@]}; i++ )) ; do
@@ -160,7 +160,7 @@ set 命令：更健壮的脚本
 
 调试
 
-```
+```bash
 trap DEBUG
 bash -x
 ```
@@ -171,13 +171,13 @@ here-document
 
 进程替换
 
-```
+```bash
 diff <(echo x) <(echo y)
 ```
 
 here-string
 
-```
+```bash
 sed 's/a/A/' <<< abc
 ```
 
@@ -194,7 +194,7 @@ sed 's/a/A/' <<< abc
 
 rm 重灾区
 
-```
+```bash
 rm -rf $dir/
 rm -rf  / dir （路径前多了一个空格，也相当于把根目录也删了）
 rm -rf /path/a/b

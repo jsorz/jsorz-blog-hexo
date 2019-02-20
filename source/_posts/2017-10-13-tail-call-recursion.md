@@ -6,7 +6,7 @@ tags: [algorithm]
 
 本文来源于一道题目：以下递归函数存在栈溢出的风险，请问如何优化？
 
-```
+```js
 function factorial (n) {
   return n * factorial(n - 1);
 }
@@ -18,7 +18,7 @@ function factorial (n) {
 
 一看，递归没写退出条件，太 easy 了
 
-```
+```js
 function factorial (n) {
   if (n === 1) return n;
   return n * factorial(n - 1);
@@ -33,7 +33,7 @@ function factorial (n) {
 
 出题者的意图应该是使用尾递归~~（见参考链接）
 
-```
+```js
 function factorial (n, total = 1) {
   if (n === 1) return total;
   return factorial(n - 1, n * total);
@@ -46,7 +46,7 @@ function factorial (n, total = 1) {
 
 ### 尾递归转化
 
-```
+```js
 function tailCall (f) {
   let value;
   let active = false;

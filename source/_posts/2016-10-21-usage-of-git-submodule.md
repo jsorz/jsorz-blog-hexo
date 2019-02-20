@@ -64,20 +64,20 @@ Git 在主项目中记录了一个子模块的提交日志的指针，用于保�
 
 方法1：
 
-```
+```bash
 git clone git@github.com:xxx/your-app.git
 git submodule update --init --recursive
 ```
 
 方法2：
 
-```
+```bash
 git clone --recursive git@github.com:xxx/your-app.git
 ```
 
 今后对主项目 pull 时
 
-```
+```bash
 git pull
 git submodule update --recursive
 ```

@@ -17,14 +17,14 @@ tags: [git]
 
 用于保持commit树的整洁
 
-```
+```bash
 git commit --amend 【修改最后一次提交】
 git pull --rebase
 ```
 
 手动合并
 
-```
+```bash
 git fetch
 git merge branch_name 【在一个分支下合并另一个分支上的改动】
 ```
@@ -33,7 +33,7 @@ git merge branch_name 【在一个分支下合并另一个分支上的改动】
 撤销回退
 --------
 
-```
+```bash
 git rm --cache file_path 【撤消已暂存的文件】
 git checkout -- file_path 【撤消对文件的修改】
 git reset --hard commit_id 【撤消commit】
@@ -52,7 +52,7 @@ git reset --hard HEAD^ 【回退到最新的前一次commit】
 
 这种情况发生在你的本地代码仓库，可能你 add commit 以后发现代码有点问题，准备取消提交，用到下面命令
 
-```
+```bash
 git reset [--soft | --mixed | --hard]
 ```
 
@@ -81,7 +81,7 @@ git revert: 用于反转提交，执行 revert 命令时要求工作树必须是
 
 revert 之后你的本地代码会回滚到指定的历史版本，这时你再 git push 既可以把线上的代码更新，也不会像 reset 造成冲突的问题。
 
-```
+```bash
 git revert commit_id
 ```
 

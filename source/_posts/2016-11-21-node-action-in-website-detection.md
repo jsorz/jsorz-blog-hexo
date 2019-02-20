@@ -166,7 +166,7 @@ Node起步
 
 runner.js 首先提供1个支持间隔时间的循环执行接口，这里使用 async 库来实现。
 
-```
+```js
 RunnerBase.prototype = {
     start: function(){
         var that = this;
@@ -213,7 +213,7 @@ RunnerBase.prototype = {
 
 这里整体是串行，使用了 eventproxy 来进行流程控制
 
-```
+```js
 Runner.prototype.run = function(cb){
 	var that = this;
 	var ep = new EventProxy();
@@ -232,7 +232,7 @@ Runner.prototype.run = function(cb){
 
 而其中最关键的步骤是并行执行 M 个 Crawler，其实现原理如下
 
-```
+```js
 function (ep){
 	var that = this;
 
@@ -290,7 +290,7 @@ function (ep, cb){
 
 这里也是用 eventproxy 控制流程的，其中关键的 context 传参调用各任务对象，实现如下
 
-```
+```js
 function (ep){
 	var that = this;
 
@@ -320,7 +320,7 @@ function (ep){
 
 “反射”是强类型编程语言中的概念（我最早是在 Java 中了解的），而 js 天然的弱类型和动态特性，很容易实现。
 
-```
+```js
 // 根据命名规则，取检测模块的引用
 getModuleFromCrawlTask: function(crawlTask){
 	var modulePath = ModuleConf.getPath(crawlTask['item_key']);
@@ -333,7 +333,7 @@ getModuleFromCrawlTask: function(crawlTask){
 
 ### 检测项分类
 
-```
+```js
 // 表明这个TaskItem属于哪一大类 (通用的除外)
 var modDict = {
 	COMMON_CRAWL: 'COMMON_CRAWL',		// 通用爬取方法 如请求页面document, 取链接等

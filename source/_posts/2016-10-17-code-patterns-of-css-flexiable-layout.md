@@ -125,7 +125,7 @@ flex 布局
 --------
 弹性图片的需求是当屏幕尺寸变化时，图片保持等比缩放，且不能出现文档高度的抖动。
 
-```
+```html
 <div class="item">
 	<div class="img-wrapper">
 		<img src="http://img.taobaocdn.com/tfscom/TB1Fhi3HVXXXXXlXpXXSutbFXXX_q50.jpg">
@@ -171,7 +171,7 @@ flex 布局
 -----------
 弹性图片的需求再进一步，需要实现等比缩放的两列布局，可以是图片，也可以是图文混排。（可参考双11商品活动页的移动端展现）
 
-```
+```html
 <div class="box banner">
     <div class="box-inner">
         <img class="banner-img" src="http://gtms04.alicdn.com/tps/i4/TB1BHIGHFXXXXbHXFXXTYq7_VXX-240-347.jpg">

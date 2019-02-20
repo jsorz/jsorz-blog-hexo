@@ -13,7 +13,7 @@ tags: [javascript, 常用片段]
 --------
 在 jquery 中，我们的第一个 hello world 程序，教程中可能会教如下的写法：
 
-```
+```js
 $(document).ready(function () {
 	// $('#el').on('click', function () {})
 });
@@ -23,7 +23,7 @@ jquery 也提供了一个更简洁的写法，即 `$(function(){...})`
 
 那这样套了一层后，能保证里面的 js 代码会在页面 DOM 树都解析完后再执行。
 
-```
+```html
 <head>
 	<script>
 	$(function () {
@@ -40,7 +40,7 @@ jquery 也提供了一个更简洁的写法，即 `$(function(){...})`
 
 我们可以拿下面的代码做个实验：
 
-```
+```html
 <body>
 	<h1>hahaha</h1>
 	<script>
@@ -54,7 +54,7 @@ jquery 也提供了一个更简洁的写法，即 `$(function(){...})`
 
 因此，为了避免在文档还未解析完成前就操作 DOM（可能会报错），也为了让 *非页面前置依赖* 的脚本在 DOM 解析完后再执行，所有教程上都建议把能放在最后的脚本都放在最后。
 
-```
+```html
 <body>
 	<h1>hahaha</h1
 	<div id="el">can you see me</div>
@@ -83,7 +83,7 @@ jquery 也提供了一个更简洁的写法，即 `$(function(){...})`
 
 当 `document.readyState` 值变化时，会触发 `readystatechange` 事件，可以用以下代码监听：
 
-```
+```js
 document.onreadystatechange = function () {
 	if (document.readyState === 'interactive') {
 		// initLoader ...
@@ -96,7 +96,7 @@ document.onreadystatechange = function () {
 
 等价的写法也可以是这样
 
-```
+```js
 document.addEventListener('readystatechange', function (event) {
 	// event.target.readyState
 });
@@ -110,7 +110,7 @@ document.addEventListener('readystatechange', function (event) {
 - `window.onload` 在 `document.readyState === 'complete'` 时触发，即页面 DOM 和其他资源都已加载完成。
 
 
-```
+```js
 document.addEventListener('DOMContentLoaded', function(event) {
     // 等同于 onreadystatechange 中的
     // document.readyState === 'interactive'
@@ -137,7 +137,7 @@ Polyfill
 
 ### 初步兼容
 
-```
+```js
 document.ready = function (callback) {
     // 兼容 FF, Chrome
     if (document.addEventListener) {
@@ -165,7 +165,7 @@ document.ready = function (callback) {
 
 ### 深度兼容
 
-```
+```js
 (function () {
     var ie = !!(window.attachEvent && !window.opera);
     var wk = /webkit\/(\d+)/i.test(navigator.userAgent) && (RegExp.$1 < 525);
@@ -216,7 +216,7 @@ document.ready = function (callback) {
 
 官方实现的代码和上面大体相似，我找了 jquery 1.4.4 的版本，因为之后 1.5.x 的 `ready` 函数实现中引入了类似 promise 中的一些概念，所以用之前的版本更能纯粹的理解 dom ready 的实现。
 
-```
+```js
 bindReady: function() {
 	if ( readyBound ) {
 		return;

@@ -203,7 +203,7 @@ replace(/"(.*)"/g, '$1')
 
 最近在做微信小程序，每个页面都必须写 wxml / wxss / js / json 这 4 个文件，当项目里页面多的时候文件就巨多无比。假如没有用任何开发框架，可以自己定制一个单文件模板，有点类似 .vue 文件。
 
-```vue
+```html
 <template>
   <view></view>
 </template>

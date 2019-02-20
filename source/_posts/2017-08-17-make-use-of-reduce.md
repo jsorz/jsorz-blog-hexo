@@ -14,7 +14,7 @@ Array 中有几个很实用的函数，比如 `each`, `map`, `filter`, `find`, `
 
 简单来说就是这样的函数形式
 
-```
+```js
 [].reduce(function (accumulator, currentValue, currentIndex, array) {
     // do something
     return accumulator;
@@ -34,7 +34,7 @@ MapReduce 是在分布式中提出的计算方法，我看过两篇解释简单�
 
 js 中也有`map`和`reduce`函数，用它俩也能实现 MapReduce，区别是 js 没有分布式计算的支持。这里简单示意下 word count 程序
 
-```
+```js
 // 一些列文章，数组中每个元素相当于一篇文章的完整字符串
 var articles = [
     'This is an example of word count.',
@@ -74,7 +74,7 @@ articles.map(function (content) {
 
 用 reduce 实现的话代码就很简单
 
-```
+```js
 [[0, 1], [2, 3, 4], [5]].reduce(function (flatten, item) {
     return flatten.concat(item);
 }, []);
@@ -82,7 +82,7 @@ articles.map(function (content) {
 
 现在考虑一下：如果输入的数组可能嵌套多层呢？形如 `[[0, [1]], [2, [3, 4]], [[[5]]]]` 且嵌套的深度我们无法预知
 
-```
+```js
 // 对多维数组的 flatten
 var flatten = function (array) {
     // 如果当前 array 已经是基础类型了，就转成1维数组
@@ -114,7 +114,7 @@ flatten([[[0, 1]], [2, [3, 4]], [[[5]]]]);
 
 顺便附上 flatten 函数的 underscore 实现版本（非递归实现）
 
-```
+```js
 // Internal implementation of a recursive `flatten` function.
 var flatten = function(input, shallow, strict, output) {
     output = output || [];
@@ -145,7 +145,7 @@ var flatten = function(input, shallow, strict, output) {
 
 另一个实用例子是统计一个页面中所有的节点数，利用 `document.getElementsByTagName('*')` 可取出所有节点的 [HTMLCollection](https://developer.mozilla.org/zh-CN/docs/Web/API/HTMLCollection)，再配合 map 和 reduce 函数就可轻松统计出各 tagName 的数目。
 
-```
+```js
 Array.prototype.slice.call(document.getElementsByTagName('*'))
     .map(function (el) {
         return el.tagName;
@@ -161,7 +161,7 @@ reduce 内部实现
 ---------------
 根据 reduce 函数的定义，可以简单这样实现（仅供学习使用）
 
-```
+```js
 Array.prototype.reduce = function (iterator, accumulator) {
   for (var i = 0; i < this.length; i++) {
     accumulator = iterator(accumulator, this[i], i, this);
@@ -172,7 +172,7 @@ Array.prototype.reduce = function (iterator, accumulator) {
 
 reduce 函数是 es5 中的标准，从 MDN 上抄了一份 Polyfill（可用于生产环境）
 
-```
+```js
 // Production steps of ECMA-262, Edition 5, 15.4.4.21
 // Reference: http://es5.github.io/#x15.4.4.21
 // https://tc39.github.io/ecma262/#sec-array.prototype.reduce

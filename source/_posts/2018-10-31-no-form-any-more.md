@@ -251,7 +251,7 @@ tags: [web组件]
 
 上面啰嗦了这么多配置型表单的 JSON 示例，我们希望封装一个表单，只需传入 JSON 配置。以 Vue 为例，希望可以这样指定表单。
 
-```vue
+```html
 <json-form v-model="formModel" :config="formItems"/>
 ```
 
@@ -286,7 +286,7 @@ export default {
 
 好在 Vue 中有个神奇的[动态组件](https://cn.vuejs.org/v2/guide/components-dynamic-async.html)，可以很方便的帮助我们生成映射后的组件。
 
-```vue
+```html
 <el-form :model="formModel">
   <el-form-item
     v-for="(input, i) in formItems"

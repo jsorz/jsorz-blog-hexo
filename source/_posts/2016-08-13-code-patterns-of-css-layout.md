@@ -261,7 +261,7 @@ background-attachment: fixed
 
 类似mac上滚动条的感觉
 
-```
+```css
 .mac-scroll {
     &::-webkit-scrollbar {
         width: 8px;

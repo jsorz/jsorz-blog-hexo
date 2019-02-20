@@ -60,7 +60,7 @@ tags: [css, 常用片段]
 
 ### 判断浏览器是否支持sticky
 
-```
+```js
 function supportSticky() {
   var _supportCSS = function(property, value){
     var el = document.createElement('i');

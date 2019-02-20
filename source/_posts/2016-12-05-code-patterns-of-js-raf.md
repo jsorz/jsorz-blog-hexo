@@ -13,7 +13,7 @@ RAF(requestAnimationFrame) 在好多地方都有见到过，只知道它和浏�
 ----------
 回想第一次见到 *requestAnimationFrame* 应该是当时在公司实习的时候，经常看到它常常和 *setTimeout* 同时出现，比如下面这样的代码片段
 
-```
+```js
 var raf = window.requestAnimationFrame
     || window.webkitRequestAnimationFrame
     || window.mozRequestAnimationFrame
@@ -47,7 +47,7 @@ RAF 既然这么好的东西，显然是存在兼容问题的，在上面 [MDN](
 
 查了网上的解决方案，包括 淘宝 也使用了这套 Polyfill：
 
-```
+```js
 // http://paulirish.com/2011/requestanimationframe-for-smart-animating/
 // http://my.opera.com/emoller/blog/2011/12/20/requestanimationframe-for-smart-er-animating
 // requestAnimationFrame polyfill by Erik Möller. fixes from Paul Irish and Tino Zijdel
@@ -86,7 +86,7 @@ RAF 既然这么好的东西，显然是存在兼容问题的，在上面 [MDN](
 
 ### 应用1：确保页面onload
 
-```
+```js
 onLoad: function(callback) {
     var rAF = window.requestAnimationFrame || window.webkitRequestAnimationFrame || function(fun) {
         setTimeout(fun, 16);
@@ -106,7 +106,7 @@ onLoad: function(callback) {
 
 ### 应用2：改进动画性能
 
-```
+```js
 var requestAnimFrame = window.requestAnimationFrame || (function () {
     var timeLast = 0;
     return window.webkitRequestAnimationFrame || window.mozRequestAnimationFrame || function (callback) {
@@ -138,7 +138,7 @@ self.timer = setTimeout(function () {
 
 ### 应用3：模块懒加载
 
-```
+```js
 var __lazyLoaded = false;
 function runLazyQueue() {
   if(__lazyLoaded) {
@@ -179,7 +179,7 @@ window.requestAnimationFrame(function() {
 
 [引自：ghugo.com] 在高频率事件中，为了防止16ms内发生多次函数执行，使用 raf 可保证16ms内只触发一次，这既能保证流畅性也能更好的节省函数执行的开销。16ms内函数执行多次没有意义，因为显示器16ms刷新一次，多次执行并不会在界面上有任何显示。
 
-```
+```js
 $box.on('mousemove', function(e){
   requestAnimationFrame(function(){
       $point.css({
@@ -192,7 +192,7 @@ $box.on('mousemove', function(e){
 
 [引自：404forest.com] 认为在循环体中调用 raf 并不能达到真正的函数节流，因为循环中的 raf 已经一下子执行完了，只是 raf 中的回调会按照 16ms 的频率依次排队执行。
 
-```
+```js
 $(function(){
   var lazyLoadList = [A, B, C, D];
   var load = function() {

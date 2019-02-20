@@ -24,7 +24,7 @@ tags: [javascript, es]
 
 在强类型的语言中，类是为了面向对象，就不得不提其三大特性【封装】【继承】【多态】
 
-```
+```js
 var Book = (function() {
   // 私有静态属性
   var privateStaticAttribute = 0;
@@ -66,7 +66,7 @@ Book.prototype.publicSharedMethod = function() {};
 
 ES5有了`Object.create()`，让我们更便捷地使用原型继承，`Object.getPrototypeOf`、`Object.setPrototypeOf` 可以更自由地操控原型链。
 
-```
+```js
 var Book = function(title) {
   Object.defineProperty(this, 'title', {
     writable: false,
@@ -110,7 +110,7 @@ console.log(Object.getPrototypeOf(jsorz).constructor === EBook);
 
 在ES2015中有了 `class` 语法糖，有了 `extends`、`super`、`static` 这样的关键字，更像强类型语言中的“类”了。
 
-```
+```js
 class Book {
   constructor(props) {
     this._title = props.title;
@@ -137,7 +137,7 @@ class EBook extends Book {
 
 上面的语法确实清晰简单了，我们再看下编译成ES5后的代码是怎样的~
 
-```
+```js
 var Book = function () {
   function Book(props) {
     _classCallCheck(this, Book);
@@ -178,7 +178,7 @@ var EBook = function (_Book) {
 
 示例生成的代码可以用 [Babel REPL](https://babeljs.io/repl/#?babili=false&browsers=&build=&builtIns=false&code_lz=MYGwhgzhAEBCD28DW0DeAoa1jwHYQBcAnAV2APiIAoAHI-GiASjUy2gIAsBLCAOgD6BbgRABTaAF5odBv2GixAbjYBfdGwDmYghxHiqLVNCI6SRXBx78h-5dHVtCYYcGjPXAWR2d4AE0M0RywKAGViblxNQONTAnNLAAMEZAEAEmMuXkEFcQdEpQd0R1BIGABRFJQxAA8CMVw_GCrWLBx8YjIKallGIzYsCBIaMR76PpV2K2yBEEiUaV7-OdwkSaKnHWgVpCoANzAQI2mbHaloA5BC4I54cKJI6OO4hOhkxCR0zOtBM9UCoqqIA&debug=false&forceAllTransforms=false&shippedProposals=false&circleciRepo=&evaluate=false&fileSize=false&lineWrap=true&presets=es2015%2Cstage-3&prettier=false&targets=&version=6.26.0&envVersion=) 查看，可以看到 ES6 提供的 `class` 语法真的是 Syntactic sugar，本质上与我们用 ES5 甚至更早时模拟“类”与继承如出一辙。其中重点的 `_inherits` 函数如下：
 
-```
+```js
 function _inherits(subClass, superClass) {
   if (typeof superClass !== "function" && superClass !== null) {
     throw new TypeError("Super expression must either be null or a function, not " + typeof superClass);

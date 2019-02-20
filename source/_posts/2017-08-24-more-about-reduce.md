@@ -16,7 +16,7 @@ reduce 的用法为 `arr.reduce(callback[, initialValue])`，在[MDN](https://de
 
 `callback` 函数接受4个参数：之前值、当前值、索引值以及数组本身。若指定 `initialValue`，则当作最初使用的 `previous` 值；如果不指定 `initialValue`，则使用数组的第一个元素作为 `previous` 初始值，同时 `current` 往后顺延。因此不指定 initialValue 时会比指定时少一次迭代。
 
-```
+```js
 [1, 2, 3].reduce((previous, current) => previous * current)
 
 [1, 2, 3].reduce((previous, current) => previous * current, 0)
@@ -30,7 +30,7 @@ reduce 的用法为 `arr.reduce(callback[, initialValue])`，在[MDN](https://de
 
 我们再来看一个黑科技，利用 reduce 结合函数 bind 可以实现函数的链式调用
 
-```
+```js
 // 给定2个字符串处理函数
 const reverse = str => str.split('').reverse().join('');
 const upper = str => str.toUpperCase();
@@ -53,7 +53,7 @@ compose(reverse, upper)('abcdefg');
 
 注：以下代码出自十年踪迹(月影)的[函数式编程入门](https://ppt.baomitu.com/d/0bda92b8#/)
 
-```
+```js
 class Task{
   constructor(){
     this.plugins = {

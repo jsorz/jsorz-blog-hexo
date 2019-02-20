@@ -10,7 +10,7 @@ tags: [javascript, 常用片段]
 
 ### offsetParent 法
 
-```
+```js
 function getOffset(el) {
   let top = 0;
   let left = 0;
@@ -33,7 +33,7 @@ function getOffset(el) {
 
 [getBoundingClientRect](https://developer.mozilla.org/zh-CN/docs/Web/API/Element/getBoundingClientRect) 取出的是元素相对于视窗的距离，那么再加上页面滚动条的偏移，就可以求出元素相对于页面左上角的距离。
 
-```
+```js
 function getOffset(el) {
   if (el === document.documentElement) {
     return { top: 0, left: 0 };
@@ -69,7 +69,7 @@ function getOffset(el) {
 
 对比下 baidu/tangram 库中的相应实现
 
-```
+```js
 baidu.dom.extend({
   offset: function() {
 

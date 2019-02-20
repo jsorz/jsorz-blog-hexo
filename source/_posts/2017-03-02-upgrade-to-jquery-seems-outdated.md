@@ -49,7 +49,7 @@ tags: [web组件, AMD]
 
 ### class.js 实现
 
-```
+```js
 define(function () {
     var initializing = false;
     var fnTest = /xyz/.test(function () {var xyz; }) ? /\b_super\b/ : /.*/;
@@ -132,7 +132,7 @@ define(function () {
 
 ### 私有成员保护
 
-```
+```js
 UIBase.extend({
     options: {
     
@@ -149,7 +149,7 @@ UIBase.extend({
 
 ### 组件扩展
 
-```
+```js
 define(function (require) {
     var Table = require('sawse/component/Table');
 
@@ -168,14 +168,14 @@ define(function (require) {
 构建打包
 --------
 
-```
+```bash
 gulp [task] [--dir=PROJECT_DIR] [--config=CONFIG_FILE]
 ```
 
 使用 gulp 来组织构建，对库代码和业务代码分别配置。
 
 
-```
+```js
 {
     // 组件库打包
     libPackConf: {

@@ -40,7 +40,7 @@ tags: [nodejs]
 
 当请求非 uft 编码的页面时，使用 superagent 请求后用 cheerio 解析，会发现取不到想要的中文字符。网上查了后知道有个叫 `iconv-lite` 的东西可以用来做转码，具体做法就对 superagent 扩展一个处理过程。
 
-```
+```js
 var superagent = require('superagent');
 var Request = superagent.Request;
 var iconv = require('iconv-lite');
@@ -95,7 +95,7 @@ module.exports = superagent;
 
 然后使用 superagent 时就引用这个扩展模块的路径
 
-```
+```js
 var superagent = require('./extension/superagent-charset');
 
 superagent.get(url)

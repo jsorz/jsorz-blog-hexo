@@ -54,7 +54,7 @@ https://myst729.github.io/#/blog/articles/2016/counting-triangles/ 提供了一�
 
 将三角形做拓扑变换（[Topology](https://en.wikipedia.org/wiki/Topology)），即可用如下数据结构简单的表示图形中的点关系
 
-```
+```js
 [
   ['A', 'A', 'A', 'A'],
   ['B', 'C', 'D', 'E'],

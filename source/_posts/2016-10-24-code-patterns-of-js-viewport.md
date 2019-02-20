@@ -13,7 +13,7 @@ tags: [javascript, 常用片段]
 
 在jquery中直接`$(window).scrollTop()`就完事了，但也要知道在原生js中的兼容性写法为
 
-```
+```js
 window.pageYOffset || document.documentElement.scrollTop || document.body.scrollTop
 ```
 
