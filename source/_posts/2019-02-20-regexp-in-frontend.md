@@ -117,7 +117,7 @@ console.log(match[1]); // undefined (分组捕获不到则表示生产环境)
 replace(/"(.*)"/g, '$1')
 ```
 
-<img src="/images/captures/20190220_find_replace.png" style="max-width: 300px">
+<img src="/images/captures/20190220_find_replace.png">
 
 大部分 IDE 的 find-replace 功能都支持写正则，不妨可以试试看，上面这段正则有什么问题。
 
@@ -125,7 +125,7 @@ replace(/"(.*)"/g, '$1')
 
 
 
-<img src="/images/captures/20190220_back_tracking.png" style="max-width: 750px">
+<img src="/images/captures/20190220_back_tracking.png">
 
 图片示例来自[《JavaScript 正则表达式迷你书》](https://zhuanlan.zhihu.com/p/29707385)
 
@@ -167,7 +167,7 @@ replace(/"(.*)"/g, '$1')
 
 先行断言的语法形式为 `/c(?=a)/`，表示匹配 a 左边的 c。为了避免与断言中的「前」和 「后」混淆，这里就用「a 左边的 c」来表达。
 
-<img src="/images/captures/20190220_look_ahead.png" style="max-width: 250px">
+<img src="/images/captures/20190220_look_ahead.png" style="max-width: 400px">
 
 先行断言有些地方也叫「前瞻断言」或「前向查找」，想象你自己就是一个指针，扫描字符串的过程就像指针在向前移动。
 
@@ -246,7 +246,7 @@ Page({
 
 当使用了 `m` 修饰符后，多行模式下会更改 `^` 和 `$` 的含义，使它们分别在任意一行的行首和行尾匹配，而不是整个字符串的开头和结尾。
 
-<img src="/images/captures/20190220_multi_line.png" style="max-width: 250px">
+<img src="/images/captures/20190220_multi_line.png" style="max-width: 400px">
 
 
 
@@ -295,7 +295,7 @@ ReDos 出现的原因就是正则匹配时的回溯算法，在上文引号替�
 
 
 
-参考资料
+**参考资料**
 
 [《JavaScript 正则表达式迷你书》](https://zhuanlan.zhihu.com/p/29707385)
 
