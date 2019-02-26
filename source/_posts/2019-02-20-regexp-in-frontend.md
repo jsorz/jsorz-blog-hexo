@@ -285,6 +285,57 @@ ReDos 出现的原因就是正则匹配时的回溯算法，在上文引号替�
 
 
 
+## JavaScript 中的正则
+
+如果读者看到这儿，说明对正则没有失去信心🌝
+
+JavaScript 中正则相关的函数有 `replace` / `test` / `match` / `exec`，上文示例代码中也用过一些了。这里强烈推荐下 `exec` 函数，当使用了 `g` 修饰符时，如果字符串中有多处匹配，`match` 函数无法拿到每处匹配中的分组信息，这就需要用 `exec` 来处理了。
+
+```js
+var reg = /￥(\d+)/g;
+console.log('￥1 ￥23 ￥33'.match(reg)); // 无法拿到分组捕获
+
+var res;
+while (res = reg.exec('￥1 ￥23 ￥33')) {
+  console.log(res, res && res[1]); // 可以拿到第1个分组
+  console.log('reg lastIndex', reg.lastIndex);
+}
+```
+
+RegExp 对象里的 `exec` 函数可以被多次调用，每次只返回一处匹配的详细信息（包括分组捕获），并且把当前处理到的字符串下标存在 RegExp 的 `lastIndex` 中，这样就可以在 `g` 全局模式下得到每处匹配的分组信息。
+
+### ES6后的新增特性
+
+ES6 之后对正则表达式的新增了不少特性，主要在对 Unicode 的支持上。如果你去网上搜那些正则表达式大全，很有可能会搜到用 `/[\u4e00-\u9fa5]/` 来识别汉字，这是很久以前的做法。现在的字符集更多了，不妨试试 `𠮷` `の` 或者 `😂` 呢？先来看个例子：
+
+```js
+console.log('😂'.length); // 2
+console.log('\uD83D\uDE02');
+```
+
+可以看到 `😂` 由 2 个双字节码组成 (UTF-16)，可以在 [codepoints](https://codepoints.net/U+1F602) 上查到它的所有编码格式，显然它已经超出了 `/[\u4e00-\u9fa5]/` 的范围。你可能会说，它又不是汉字，当然不能用上面那个正则，那不妨再查下 `𠮷` 的编码。
+
+ES6 对正则表达式有个 `u` 修饰符，表示 Unicode 模式。在这个模式下，正则中的 `.` 可以匹配换行符以外的任意单个字符（包括 Unicode 字符）。
+
+```js
+/./.test('😂');  		// true  因为 😂 被认为是2个字符，相当于 '\uD83D\uDE02'
+/.{2}/.test('😂'); 		// true  原因同上
+/\S{2}/.test('😂'); 	// true  原因同上
+/^.$/.test('😂'); 		// false 正则限制了开头和结尾，2个字符当然匹配不上咯
+/^.$/u.test('😂'); 		// true  Unicode 模式下，认为 😂 是1个字符
+/.{2}/u.test('😂'); 	// false 原因同上
+/\S{2}/u.test('😂'); 	// false 原因同上
+/\u{1F602}/u.test('😂');// true
+```
+
+Unicode 模式下还可以用 `\u{unicode值}` 来表示码点大于 `0xFFFF` 的 Unicode 字符。
+
+此外，ES2018 还引入了 Unicode 属性转义，比如可以用 `/\p{Unified_Ideograph}/u` 来匹配所有汉字。其中 `Unified_Ideograph` 是一个 Unicode property 表示汉字字符集，可在 [tc39](https://github.com/tc39/proposal-regexp-unicode-property-escapes) 中查到所有属性转义。
+
+当然，ES6 和 ES2018 还增加了另外2个修饰符，以及后行断言和具名分组，出于篇幅原因这里就不多介绍了，有兴趣的可以参考 [ECMAScript 6 入门的正则章节](http://es6.ruanyifeng.com/#docs/regex)。
+
+
+
 ## 总结
 
 正则表达式是前端工程师的一把利器，也是值得每个程序员掌握的。本文抛砖引玉，主要想说明正则表达式在前端中有着很多应用场景，而不仅仅是纯粹的表单验证。
