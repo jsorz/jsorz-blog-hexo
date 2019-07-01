@@ -76,3 +76,10 @@ tags: []
   - 先确定是否跟机型有关，如果是兼容性问题配合前端监控来看
   - 跟机型无关，再排查出错的随机性，是否与脚本并行加载的执行顺序有关
   - 是否依赖外部，如 hybrid 方法，外部是否稳定，配合 console log 来看
+
+
+
+【参考资料】
+
+- [Charles 高级玩法](http://blog.devtang.com/2015/11/14/charles-introduction/)
+
