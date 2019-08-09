@@ -5,7 +5,9 @@
   right: $b2t-position-right;
   z-index: $zindex-5;
   padding: 0 6px;
-  width: hexo-config('sidebar.scrollpercent') ? initial : 24px;
+  width: 32px;
+  height: 32px;
+  line-height: 32px;
   background: $b2t-bg-color;
   font-size: $b2t-font-size;
   opacity: $b2t-opacity;
@@ -25,5 +27,9 @@
 
   &.back-to-top-on {
     bottom: $b2t-position-bottom-on;
+  }
+
+  .fa {
+    font-size: 14px;
   }
 }
