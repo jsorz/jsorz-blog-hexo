@@ -1,6 +1,6 @@
 ---
 title: 读书「演讲的力量」
-category: 吹水
+category: 其他
 tags: [读书笔记]
 ---
 
