@@ -1,14 +1,13 @@
 ---
 layout: post
 title: "跨域通信常用技术"
-description: ""
-category: 
+category: 开发
 tags: []
 ---
 
-<!-- more -->
+前端常用通信方法实验，侧重跨域以及单双向
 
-- 前端常用通信方法实验，侧重跨域以及单双向
+<!-- more -->
 
 |                       | 通信形式 | iframe 场景 | 不改写 document.domain | 跨子域主域 | 不使用 Flash |
 | --------------------- | ---- | --------- | ------------------- | ----- | --------- |
@@ -24,8 +23,6 @@ tags: []
 | Cross Frame           | 双向通信 | ✔         | ✔                   | ✔     | ✔         |
 
 
-
 ### 参考资料
 
-- [HTTP访问控制（CORS）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)
-
+- [跨源资源共享（CORS）](https://developer.mozilla.org/zh-CN/docs/Web/HTTP/Access_control_CORS)
